@@ -1,19 +1,15 @@
-const a: number = 12
-const b: number = 24
+import DateTag from "./date";
+import { functionTypeAnnotation } from "@babel/types";
 
-const aBin = a.toString(2)
-const bBin = b.toString(2)
-
-const aBinLong = buildStrBin(aBin, 5)
-const bBinLong = buildStrBin(bBin, 5)
-// console.log(aBin[0])
-// console.log(bBin)
 /**
  * Extends a binary string to a given length
  * @param s binary string of a number
  * @param l desired lenght of the binary string
  */
-function buildStrBin (s : string, l:number) :string{
+export function buildStrBin (s : string, l:number) :string{
+    if (s.length > l) {
+        throw new Error()
+    }
     let res = ""
     const lenght = l ? l : 4
     const diff = lenght > s.length ? lenght - s.length : 0
@@ -32,7 +28,7 @@ function buildStrBin (s : string, l:number) :string{
  * @param s binary string
  * @param o number of replaced digits at the end
  */
-function getMin(s:string, o:number) :[number,string]{
+export function getMin(s:string, o:number) :[number,string]{
     let res = ""
     const e = s.substr(0,s.length-o)
     // console.log(e)
@@ -55,7 +51,7 @@ function getMin(s:string, o:number) :[number,string]{
  * @param s binary string
  * @param o number of replaced digits at the end
  */
-function getMax(s:string, o:number) :[number,string]{
+export function getMax(s:string, o:number) :[number,string]{
     let res = ""
     const e = s.substr(0,s.length-o)
     for (let i = 0; i < s.length; i++) {
@@ -78,7 +74,7 @@ function getMax(s:string, o:number) :[number,string]{
  * @param s input string of a binary value
  * @param offset number of values at the end of s that are replaced
  */
-function getMinMaxRange(s:string, offset: number) :[number, number] {
+export function getMinMaxRange(s:string, offset: number) :[number, number] {
     const minRes = getMin(s,offset)
     const minVal = minRes[0]
     const maxRes = getMax(s,offset)
@@ -91,7 +87,7 @@ function getMinMaxRange(s:string, offset: number) :[number, number] {
  * @param n number of repetitions
  * @param val string to be repeated
  */
-function appendStrVals(n:number, val:string){
+export function appendStrVals(n:number, val:string){
     let res = ""
     for (let i=0; i<n;i++){
         res = res + val
@@ -104,7 +100,7 @@ function appendStrVals(n:number, val:string){
  * @param start start value
  * @param end end value
  */
-function getChildNodes(s:string, start:number, end:number) :string[]{
+export function getChildNodes(s:string, start:number, end:number) :string[]{
     let result = []
     for (let i = 0; i < s.length - 1; i++){
         /**
@@ -140,7 +136,7 @@ function getChildNodes(s:string, start:number, end:number) :string[]{
  * @param start starting leave
  * @param end ending leave
  */
-function getNodesForHashing(start:number, end:number, treeMax?:number) {
+export function getNodesForHashing(start:number, end:number, treeMax?:number) :string[] {
     treeMax = treeMax ? treeMax : 31
     const depth = Math.ceil(Math.log2(treeMax))
 
@@ -152,11 +148,254 @@ function getNodesForHashing(start:number, end:number, treeMax?:number) {
     const startHashing = getChildNodes(startBinLong, start, end)
     const endHashing = getChildNodes(endBinLong, start, end)
     const allHashing =[...new Set([...startHashing,...endHashing])] 
-    console.log(`-------------- \nStart: ${start} \nEnd: ${end} \nHashingVals: [${allHashing}]`)
+    console.log(`-------------- \nStart: ${start} \nEnd: ${end} \nHashingVals(${allHashing.length}): [${allHashing}]`)
+    return allHashing
 }
-getNodesForHashing(1,31)
-getNodesForHashing(5,21)
-getNodesForHashing(20,22)
-getNodesForHashing(13,18)
-getNodesForHashing(19,29)
-getNodesForHashing(16,17)
+
+export function sliceDateframe(start: DateTag, end: DateTag) {
+    const diffYear =  end.year - start.year + 1
+    const diffMonth = end.month - start.month + 1 
+    const diffDay =  end.day - start.day + 1 
+    const ranges = []
+    return checkYears(start, end);
+
+}
+
+export function checkYears(start:DateTag, end: DateTag) {
+    if (start.year === end.year) {
+        return checkMonths(start, end)
+    } else {
+        const years = checkYears(new DateTag(start.year + 1, 1, 1), end)
+        return [...[start, new DateTag(start.year, 12, 31)], ...years]
+    }
+
+}
+
+export function checkMonths(start:DateTag, end: DateTag) {
+    if (start.month === end.month) {
+        return checkDays(start, end)
+    } else {
+        const months = checkMonths(new DateTag(start.year, start.month + 1 , 1), end)
+        return [...[start, new DateTag(start.year, start.month, 31)], ...months]
+    }
+
+
+}
+
+export function checkDays(start:DateTag, end: DateTag) {
+    if (start.day === end.day) {
+        return [start, end]
+    } else {
+        const days = checkDays(new DateTag(start.year, start.month , start.day + 1), end)
+        return [...[start, new DateTag(start.year, start.month, start.day)], ...days]
+    }
+
+
+}
+const dateStart = new DateTag(2019,4,1)
+const dateEnd = new DateTag(2019,4,3)
+
+ export function getYears(s: DateTag, e: DateTag) {
+    const diffYear =  e.year - s.year
+    let years = []
+    for (let index = 0; index <= diffYear; index++) {
+        years = [...years,s.year + index]
+    }
+    return years
+
+ }
+
+ export function getMonths(s: DateTag, e: DateTag) {
+    const diff =  e.month - s.month
+    let list = []
+    for (let index = 0; index <= diff; index++) {
+        list = [...list,s.month + index]
+    }
+    return list
+
+ }
+ export function getDays(s: DateTag, e: DateTag) {
+    const diff =  e.day - s.day
+    let list = []
+    for (let index = 0; index <= diff; index++) {
+        list = [...list,s.year + index]
+    }
+    return list
+
+ }
+
+ export function fromYears(s: DateTag, e: DateTag){
+     const yearList = getYears(s, e)
+     if(yearList.length === 1) {
+        const hashes = getNodesForHashing(
+            s.year,
+            e.year,
+            9999
+         )
+        return fromMonths(s,e, hashes[0])
+
+     } else if(yearList.length === 2) {
+        const yearStart = [s,new DateTag(yearList[0], 12, 31)] 
+        const yearEnd = [new DateTag(yearList[1], 1, 1), e] 
+
+        const hashesStart = getNodesForHashing(
+            yearStart[0].year,
+            yearStart[1].year,
+            9999
+         )
+         const hashesEnd = getNodesForHashing(
+            yearEnd[0].year,
+            yearEnd[1].year,
+            9999
+         )
+         const hashesStartSub = fromMonths(yearStart[0],yearStart[1], hashesStart[0])
+         const hashesEndSub = fromMonths(yearEnd[0],yearEnd[1], hashesEnd[0])
+         return [
+             ...hashesStartSub.map((e)=> hashesStart[0] + e),
+            ...hashesEndSub.map((e)=> hashesEnd[0] + e)
+        ]
+        
+
+
+     } else if(yearList.length === 3) {
+        const yearStart = [s,new DateTag(yearList[0], 12, 31)] 
+        const yearEnd = [new DateTag(yearList[-1], 1, 1), e] 
+        const yearRest =[yearList[1], yearList[-2]]
+        const hashesStart = getNodesForHashing(
+            yearStart[0].year,
+            yearStart[1].year,
+            9999
+         )
+         const hashesEnd = getNodesForHashing(
+            yearEnd[0].year,
+            yearEnd[1].year,
+            9999
+         )
+         const hashesRest = getNodesForHashing(
+            yearRest[0],
+            yearRest[1],
+            9999
+         )
+         const hashesStartSub = fromMonths(yearStart[0],yearStart[1], hashesStart[0])
+         const hashesEndSub = fromMonths(yearEnd[0],yearEnd[1], hashesEnd[0])
+         return [...hashesStartSub,...hashesEndSub, ...hashesRest]
+
+
+     } else {
+         throw Error("yearList empty")
+     }
+ }
+
+ export function fromMonths(s: DateTag, e: DateTag, p:string){
+     const list = getMonths(s, e)
+     if(list.length === 1) {
+        const hashes = getNodesForHashing(
+            s.month,
+            e.month,
+            12
+         )
+         return fromDays(s,e, hashes[0]).map((e)=> p + e)
+
+
+     } else if(list.length === 2) {
+        const firstElem = [s,new DateTag(e.year, list[0], 31)] 
+        const lastElem = [new DateTag(list[1], 1, 1), e] 
+
+        const hashesStart = getNodesForHashing(
+            firstElem[0].month,
+            firstElem[1].month,
+            12
+         )
+
+         const hashesEnd = getNodesForHashing(
+            lastElem[0].month,
+            lastElem[1].month,
+            12
+         )
+         const hashesStartSub = fromDays(firstElem[0],firstElem[1], hashesStart[0])
+         const hashesEndSub = fromDays(lastElem[0],lastElem[1], hashesEnd[0])
+         return [...hashesStartSub.map((e)=> p + e),...hashesEndSub.map((e)=> p + e)]
+
+
+     } else if(list.length >= 2) {
+        const firstElem = [s,new DateTag(e.year, list[0], 31)] 
+        const lastElem = [new DateTag(e.year, list[list.length -1 ], 1), e] 
+        const restElem =[list[1], list[list.length -2 ]]
+        
+        const hashesStart = getNodesForHashing(
+            firstElem[0].month,
+            firstElem[1].month,
+            12
+         )
+
+         const hashesEnd = getNodesForHashing(
+            lastElem[0].month,
+            lastElem[1].month,
+            12
+         )
+        const hashesStartSub = fromDays(firstElem[0],firstElem[1], hashesStart[0])
+        const hashesEndSub = fromDays(lastElem[0],lastElem[1], hashesEnd[0])
+        const hashesRest = getNodesForHashing(
+            restElem[0],
+            restElem[1],
+            12
+         )
+        return [...hashesStartSub.map((e)=> p + e),...hashesEndSub.map((e)=> p + e), ...hashesRest.map((e)=> p + e)]
+     } else {
+         throw Error("yearList empty")
+     }
+
+
+ }
+ export function fromDays(s: DateTag, e: DateTag, p:string){
+     const list = getDays(s, e)
+     const hashes = getNodesForHashing(
+        s.day,
+        e.day,
+        31
+     )
+     const prefixHashes = hashes.map((e)=> p + e)
+    
+    return prefixHashes 
+     if(list.length === 1) {
+        getNodesForHashing(
+            s.day,
+            e.day,
+            31
+         )
+
+
+     } else if(list.length === 2) {
+        const firstElem = [s,new DateTag(e.year, e.month, e.day)] 
+        getNodesForHashing(
+            s.day,
+            e.day,
+            31
+         )
+
+        const lastElem = [new DateTag(list[1], 1, 1), e] 
+        getNodesForHashing(
+            s.year,
+            e.year,
+            9999
+         )
+         getNodesForHashing(
+            lastElem[0].month,
+            lastElem[1].month,
+            99
+         )
+
+
+     } else if(list.length === 3) {
+        const yearStart = [s,new DateTag(list[0], 12, 31)] 
+        const yearEnd = [new DateTag(list[-1], 1, 1), e] 
+        const yearRest =[list[1], list[-2]]
+
+     } else {
+         throw Error("yearList empty")
+     }
+
+
+ }
+
+fromYears(dateStart, dateEnd)

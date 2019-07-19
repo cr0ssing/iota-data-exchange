@@ -2,13 +2,20 @@
   "name": "marks-key-tree",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "out/index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
+    "run": "node out/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^24.0.15",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.5.3"
+  }
 }
