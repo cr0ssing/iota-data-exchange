@@ -24,3 +24,21 @@ export interface IHour {
   value: number;
   seconds: number[];
 }
+export enum EYear {
+  max = 16384,
+  min = 0,
+}
+export enum EMonth {
+  max = 15,
+  min = 0,
+}
+export enum EDay {
+  max = 31,
+  min = 0,
+}
+
+export enum EDateTagProps {
+  YEAR = 'year',
+  MONTH = 'month',
+  DAY = 'day',
+}

@@ -19,7 +19,7 @@ rules:
       - time
       - timeEnd
       - trace
-  completed-docs: [true, 'enums', 'functions', 'methods']
+  completed-docs: [true, 'functions', 'methods']
 jsRules:
   max-line-length:
     options: [120]
