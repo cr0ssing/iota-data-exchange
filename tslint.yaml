@@ -1,0 +1,25 @@
+extends:
+  - 'tslint:recommended'
+  - 'tslint-config-prettier'
+rulesDirectory:
+rules:
+  max-line-length:
+    options: [120]
+  new-parens: true
+  ordered-imports: true
+  no-arg: true
+  no-bitwise: true
+  no-conditional-assignment: true
+  no-consecutive-blank-lines: false
+  no-console:
+    severity: warning
+    options:
+      - debug
+      - info
+      - time
+      - timeEnd
+      - trace
+  completed-docs: [true, 'enums', 'functions', 'methods']
+jsRules:
+  max-line-length:
+    options: [120]
