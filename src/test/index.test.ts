@@ -5,6 +5,7 @@ import {
   getDiff,
   getMinMaxRange,
   getNodesForHashing,
+  fromYears,
 } from '../index';
 import { EDateTagProps, EDay, EMonth, EYear } from '../typings/Date';
 
@@ -136,5 +137,22 @@ describe('Hashnode calculation', () => {
     const month2 = EMonth.max - 5;
     const res = getNodesForHashing(month1, month2, EMonth.max);
     expect(res).toStrictEqual(['0101', '011X', '1010', '100X']);
+  });
+});
+describe('Nodes from daterange', () => {
+  it('for one day', () => {
+    const dateStart = new DateTag(2019, 4, 1);
+    const dateEnd = new DateTag(2019, 4, 2);
+    const res = fromYears(dateStart, dateEnd);
+    expect(res).toStrictEqual([
+      '00011111100011010000001',
+      '00011111100011010000010',
+    ]);
+  });
+  it('for one year', () => {
+    const dateStart = new DateTag(2019, 4, EDay.min);
+    const dateEnd = new DateTag(2019, 4, EDay.max);
+    const res = fromYears(dateStart, dateEnd);
+    expect(res).toStrictEqual(['000111111000110100']);
   });
 });

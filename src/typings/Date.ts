@@ -27,14 +27,17 @@ export interface IHour {
 export enum EYear {
   max = 16384,
   min = 0,
+  depth = Math.ceil(Math.log2(max)),
 }
 export enum EMonth {
   max = 15,
   min = 0,
+  depth = Math.ceil(Math.log2(max)),
 }
 export enum EDay {
   max = 31,
   min = 0,
+  depth = Math.ceil(Math.log2(max)),
 }
 
 export enum EDateTagProps {

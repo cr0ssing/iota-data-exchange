@@ -317,7 +317,7 @@ export function fromYears(s: DateTag, e: DateTag) {
 
     // Todo maybe direct converstion to bin is faster/possible
     // const hashes = getNodesForHashing(s.year, e.year, 9999);
-    const hashes = buildStrBin(s.year.toString(2), 4);
+    const hashes = buildStrBin(s.year.toString(2), EYear.depth);
     /**
      * go deeper and check the months
      */
@@ -394,7 +394,7 @@ export function fromYears(s: DateTag, e: DateTag) {
 export function fromMonths(s: DateTag | null, e: DateTag | null, p: string) {
   const list = getDiff(s, e, EDateTagProps.MONTH);
   if (list.length === 1) {
-    const hashes = getNodesForHashing(s.month, e.month, EMonth.max);
+    const hashes = [buildStrBin(s.month.toString(2), EMonth.depth)];
     return fromDays(s, e, hashes[0]).map(el => p + el);
   } else if (list.length === 2) {
     const firstElem = [s, new DateTag(e.year, list[0], EDay.max)];
@@ -428,7 +428,7 @@ export function fromMonths(s: DateTag | null, e: DateTag | null, p: string) {
     }
     // Case 2 - start of year is not included split needed
     else if (s === null && e !== null) {
-      lastElem = [null, e];
+      lastElem = [new DateTag(e.year, EMonth.min, EDay.min), e];
       restElem = [list[0], list[list.length - 2]];
     }
     // Case 3 - start and end is in the same year, split needed
@@ -472,8 +472,11 @@ export function fromDays(s: DateTag, e: DateTag, p: string) {
   const list = getDiff(s, e, EDateTagProps.DAY);
   const hashes = getNodesForHashing(s.day, e.day, EDay.max);
   const prefixHashes = hashes.map(el => p + el);
-
-  return prefixHashes;
+  if (prefixHashes.length > 0) {
+    return prefixHashes;
+  } else {
+    return [p];
+  }
   // Todo extend to support minutes and seconds
   if (list.length === 1) {
     getNodesForHashing(s.day, e.day, 31);
