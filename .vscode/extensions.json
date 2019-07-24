@@ -5,6 +5,7 @@
     "esbenp.prettier-vscode",
     "aaron-bond.better-comments",
     "xabikos.javascriptsnippets",
+    "ryanluker.vscode-coverage-gutters",
     "orta.vscode-jest"
   ]
 }
