@@ -145,15 +145,17 @@ describe('Nodes from daterange', () => {
     const dateEnd = new DateTag(2019, 4, 2);
     const res = fromYears(dateStart, dateEnd);
     expect(res).toStrictEqual([
-      '00011111100011010000001',
-      '00011111100011010000010',
+      '00011111100011010000001', // 2019-04-01
+      '00011111100011010000010', // 2019-04-02
     ]);
   });
   it('for one year', () => {
     const dateStart = new DateTag(2019, 4, EDay.min);
     const dateEnd = new DateTag(2019, 4, EDay.max);
     const res = fromYears(dateStart, dateEnd);
-    expect(res).toStrictEqual(['000111111000110100']);
+    expect(res).toStrictEqual([
+      '000111111000110100', // 2019
+    ]);
   });
   it('specific daterange same year different months', () => {
     const dateStart = new DateTag(2019, 3, 5);
@@ -186,6 +188,46 @@ describe('Nodes from daterange', () => {
         '00011111100100100001010', // 2020-08-10
         '0001111110010010000100X', // 2020-08-08    - 2020-08-09
         '000111111001000XXX', // 2020-00    - 2020-07
+      ].sort()
+    );
+  });
+  it('specific daterange three year different months', () => {
+    const dateStart = new DateTag(2019, 3, 5);
+    const dateEnd = new DateTag(2021, 8, 10);
+    const res = fromYears(dateStart, dateEnd);
+    expect(res.sort()).toStrictEqual(
+      [
+        '00011111100011001100101', // 2019-03-05
+        '0001111110001100110011X', // 2019-03-06 - 2019-03-07
+        '00011111100011001101XXX', // 2019-03-08 - 2019-03-15
+        '0001111110001100111XXXX', // 2019-03-16 - 2019-03-31
+        '0001111110001101XX', // 2019-04    - 2019-07
+        '000111111000111XXX', // 2019-08    - 2019-15
+        '00011111100100', // 2020
+        '000111111001010XXX', // 2021-00    - 2021-07
+        '00011111100101100000XXX', // 2021-08-00    - 2021-08-07
+        '0001111110010110000100X', // 2021-08-08    - 2021-08-09
+        '00011111100101100001010', // 2021-08-10
+      ].sort()
+    );
+  });
+  it('specific daterange four year different months', () => {
+    const dateStart = new DateTag(2019, 3, 5);
+    const dateEnd = new DateTag(2022, 8, 10);
+    const res = fromYears(dateStart, dateEnd);
+    expect(res.sort()).toStrictEqual(
+      [
+        '00011111100011001100101', // 2019-03-05
+        '0001111110001100110011X', // 2019-03-06 - 2019-03-07
+        '00011111100011001101XXX', // 2019-03-08 - 2019-03-15
+        '0001111110001100111XXXX', // 2019-03-16 - 2019-03-31
+        '0001111110001101XX', // 2019-04    - 2019-07
+        '000111111000111XXX', // 2019-08    - 2019-15
+        '0001111110010X', // 2020 - 2021
+        '000111111001100XXX', // 2022-00    - 2022-07
+        '00011111100110100000XXX', // 2022-08-00    - 2022-08-07
+        '0001111110011010000100X', // 2022-08-08    - 2022-08-09
+        '00011111100110100001010', // 2022-08-10
       ].sort()
     );
   });

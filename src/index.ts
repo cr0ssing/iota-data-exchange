@@ -335,21 +335,9 @@ export function fromYears(s: DateTag, e: DateTag) {
     const yearStart = [s, null];
     const yearEnd = [null, e];
     // calculate the nodes for the range start year
-    // Todo maybe direct converstion to bin is faster/possible
-    // const hashesStart = getNodesForHashing(
-    //   yearStart[0].year,
-    //   yearStart[1].year,
-    //   9999
-    // );
     const hashesStart = buildStrBin(yearStart[0].year.toString(2), 14);
 
     // calculate the nodes for the range start year
-    // Todo maybe direct converstion to bin is faster/possible
-    // const hashesEnd = getNodesForHashing(
-    //   yearEnd[0].year,
-    //   yearEnd[1].year,
-    //   9999
-    // );
     const hashesEnd = buildStrBin(yearEnd[1].year.toString(2), 14);
 
     // calculate the nodes for the range end year
@@ -357,27 +345,23 @@ export function fromYears(s: DateTag, e: DateTag) {
     const hashesStartSub = fromMonths(yearStart[0], yearStart[1], hashesStart);
     const hashesEndSub = fromMonths(yearEnd[0], yearEnd[1], hashesEnd);
     return [...hashesStartSub, ...hashesEndSub];
-  } else if (yearList.length === 3) {
+  } else if (yearList.length > 2) {
     /**
      * If the timeframe is bigger than two years split it into three parts.
      * First the start till the end of the start year.
      * Second the years between start and end. These years have no deeper nodes.
      * Third the beginning of the end year till the end of the end year.
      */
-    const yearStart = [s, new DateTag(yearList[0], EMonth.max, EDay.max)];
-    const yearEnd = [new DateTag(yearList[-1], EMonth.min, EDay.min), e];
-    const yearRest = [yearList[1], yearList[-2]];
-    const hashesStart = getNodesForHashing(
-      yearStart[0].year,
-      yearStart[1].year,
-      EYear.max
-    );
-    const hashesEnd = getNodesForHashing(
-      yearEnd[0].year,
-      yearEnd[1].year,
-      EYear.max
-    );
-    const hashesRest = getNodesForHashing(yearRest[0], yearRest[1], EYear.max);
+    const yearStart = [s, null];
+    const yearEnd = [null, e];
+    const yearRest = [...new Set([yearList[1], yearList[yearList.length - 2]])];
+
+    const hashesStart = [buildStrBin(s.year.toString(2), EYear.depth)];
+    const hashesEnd = [buildStrBin(e.year.toString(2), EYear.depth)];
+    const hashesRest =
+      yearRest.length > 1
+        ? getNodesForHashing(yearRest[0], yearRest[1], EYear.max)
+        : [buildStrBin(yearRest[0].toString(2), EYear.depth)];
     const hashesStartSub = fromMonths(
       yearStart[0],
       yearStart[1],
@@ -397,12 +381,27 @@ export function fromYears(s: DateTag, e: DateTag) {
  */
 export function fromMonths(s: DateTag | null, e: DateTag | null, p: string) {
   const list = getDiff(s, e, EDateTagProps.MONTH);
+  let firstElem: DateTag[] | undefined;
+  let lastElem: DateTag[] | undefined;
+  let restElem: number[];
+
   if (list.length === 1) {
     const hashes = [buildStrBin(s.month.toString(2), EMonth.depth)];
     return fromDays(s, e, hashes[0]).map(el => p + el);
   } else if (list.length === 2) {
-    const firstElem = [s, new DateTag(e.year, list[0], EDay.max)];
-    const lastElem = [new DateTag(list[1], EMonth.min, EDay.min), e];
+    // Case 1 - until end of year
+    if (s !== null && e === null) {
+      firstElem = [s, new DateTag(s.year, s.month, EDay.max)];
+    }
+    // Case 2 - from beginning of year
+    else if (s === null && e !== null) {
+      lastElem = [new DateTag(e.year, e.month, EDay.min), e];
+    }
+    // Case 3 - start and end is in the same year, split needed
+    else if (s !== null && e !== null) {
+      firstElem = [s, new DateTag(e.year, list[0], EDay.max)];
+      lastElem = [new DateTag(e.year, list[list.length - 1], EDay.min), e];
+    }
 
     const hashesStart = getNodesForHashing(
       firstElem[0].month,
@@ -417,14 +416,12 @@ export function fromMonths(s: DateTag | null, e: DateTag | null, p: string) {
     );
     const hashesStartSub = fromDays(firstElem[0], firstElem[1], hashesStart[0]);
     const hashesEndSub = fromDays(lastElem[0], lastElem[1], hashesEnd[0]);
+
     return [
       ...hashesStartSub.map(el => p + el),
       ...hashesEndSub.map(el => p + el),
     ];
-  } else if (list.length >= 2) {
-    let firstElem: DateTag[] | undefined;
-    let lastElem: DateTag[] | undefined;
-    let restElem: number[];
+  } else if (list.length > 2) {
     // Case 1 - until end of year
     if (s !== null && e === null) {
       firstElem = [s, new DateTag(s.year, s.month, EDay.max)];
