@@ -142,7 +142,11 @@ export function getChildNodes(s: string, start: number, end: number): string[] {
       result = [...result, res];
     }
   }
-  return result;
+  if (result.length > 0) {
+    return result;
+  } else {
+    return [s[0] + appendStrVals(s.length - 1, 'X')];
+  }
 }
 /**
  * Calculcates the nodes needed for hashing
@@ -426,9 +430,9 @@ export function fromMonths(s: DateTag | null, e: DateTag | null, p: string) {
       firstElem = [s, new DateTag(s.year, s.month, EDay.max)];
       restElem = [list[1], list[list.length - 1]];
     }
-    // Case 2 - start of year is not included split needed
+    // Case 2 - from beginning of year
     else if (s === null && e !== null) {
-      lastElem = [new DateTag(e.year, EMonth.min, EDay.min), e];
+      lastElem = [new DateTag(e.year, e.month, EDay.min), e];
       restElem = [list[0], list[list.length - 2]];
     }
     // Case 3 - start and end is in the same year, split needed

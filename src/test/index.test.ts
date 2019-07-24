@@ -1,11 +1,11 @@
 import DateTag from '../DateTag';
 import {
   buildStrBin,
+  fromYears,
   getChildNodes,
   getDiff,
   getMinMaxRange,
   getNodesForHashing,
-  fromYears,
 } from '../index';
 import { EDateTagProps, EDay, EMonth, EYear } from '../typings/Date';
 
@@ -154,5 +154,39 @@ describe('Nodes from daterange', () => {
     const dateEnd = new DateTag(2019, 4, EDay.max);
     const res = fromYears(dateStart, dateEnd);
     expect(res).toStrictEqual(['000111111000110100']);
+  });
+  it('specific daterange same year different months', () => {
+    const dateStart = new DateTag(2019, 3, 5);
+    const dateEnd = new DateTag(2019, 8, 10);
+    const res = fromYears(dateStart, dateEnd);
+    expect(res).toStrictEqual([
+      '00011111100011001100101', // 2019-03-05
+      '0001111110001100110011X', // 2019-03-06 - 2019-03-07
+      '00011111100011001101XXX', // 2019-03-08 - 2019-03-15
+      '0001111110001100111XXXX', // 2019-03-16 - 2019-03-31
+      '00011111100011100000XXX', // 2019-08-00 - 2019-08-07
+      '00011111100011100001010', // 2019-08-10
+      '0001111110001110000100X', // 2019-08-08 - 2019-08-09
+      '0001111110001101XX', // 2019-04    - 2019-07
+    ]);
+  });
+  it('specific daterange two year different months', () => {
+    const dateStart = new DateTag(2019, 3, 5);
+    const dateEnd = new DateTag(2020, 8, 10);
+    const res = fromYears(dateStart, dateEnd);
+    expect(res.sort()).toStrictEqual(
+      [
+        '00011111100011001100101', // 2019-03-05
+        '0001111110001100110011X', // 2019-03-06 - 2019-03-07
+        '00011111100011001101XXX', // 2019-03-08 - 2019-03-15
+        '0001111110001100111XXXX', // 2019-03-16 - 2019-03-31
+        '0001111110001101XX', // 2019-04    - 2019-07
+        '000111111000111XXX', // 2019-08    - 2019-15
+        '00011111100100100000XXX', // 2020-08-00    - 2020-08-07
+        '00011111100100100001010', // 2020-08-10
+        '0001111110010010000100X', // 2020-08-08    - 2020-08-09
+        '000111111001000XXX', // 2020-00    - 2020-07
+      ].sort()
+    );
   });
 });
