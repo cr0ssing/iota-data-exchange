@@ -2,5 +2,6 @@
   "editor.formatOnSave": true,
   "prettier.requireConfig": true,
   "prettier.trailingComma": "es5",
-  "better-comments.multilineComments": true
+  "better-comments.multilineComments": true,
+  "jest.showCoverageOnLoad": true
 }
