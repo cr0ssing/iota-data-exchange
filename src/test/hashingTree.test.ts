@@ -23,10 +23,10 @@ describe('Hashing Tree', () => {
     const dateStart = new DateTag(2019, 4, 1);
     const dateEnd = new DateTag(2019, 4, 2);
     const res = fromYears(dateStart, dateEnd).map(e => e.replace('X', ''));
-    // const input = '00011111100011010000001';
-    // const input1 = '00011111100011010000010';
-    const input = '1';
-    const input1 = '0';
+    const input = '00011111100011010000001';
+    const input1 = '00011111100011010000010';
+    // const input = '1';
+    // const input1 = '0';
     const inputExt = '01';
     const secret = 'mySecret';
     const hashInput = hashBinArray(input, secret, false);

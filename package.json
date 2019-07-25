@@ -9,6 +9,7 @@
   "scripts": {
     "run": "node out/index.js",
     "test": "jest",
+    "coverage": "jest --collect-coverage",
     "lint": "tslint 'src/**/*.{ts,tsx}'"
   },
   "author": "",

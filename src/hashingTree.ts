@@ -11,7 +11,7 @@ import { binStrToTernStr } from './ternaryStringOperations';
  * @param hashFunc hashing function
  */
 export function hashBinArray(a: string, startVal: string, tryte: boolean) {
-  let result;
+  let result: string;
   if (tryte) {
     result = startVal;
   } else {
