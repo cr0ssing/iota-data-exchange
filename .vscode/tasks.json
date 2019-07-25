@@ -23,6 +23,14 @@
       "type": "npm",
       "script": "run",
       "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
     }
   ]
 }

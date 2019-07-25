@@ -1,5 +1,5 @@
 module.exports = {
-  roots: ['<rootDir>/src'],
+  roots: ['src'],
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
@@ -9,5 +9,4 @@ module.exports = {
     '!**/node_modules/**',
     '!**/vendor/**',
   ],
-  testPathIgnorePatterns: ['src/index.ts'],
 };

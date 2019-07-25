@@ -6,7 +6,7 @@ describe('Hashing Tree', () => {
     const input = '010101';
     const inputTernary = binStrToTernStr(input);
     const secret = 'mySecret';
-    const hash = hashBinArray(input, secret, null);
+    const hash = hashBinArray(input, secret);
     expect(hash).toBe('');
   });
 });

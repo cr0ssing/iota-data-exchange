@@ -1,7 +1,7 @@
 import { Function } from '@babel/types';
 import * as converter from '@iota/converter';
-import * as kerl from '@iota/kerl';
 import Curl from '@iota/curl';
+import * as kerl from '@iota/kerl';
 import { binStrToTernStr } from './ternaryStringOperations';
 /**
  * Calculates the hash for a given path and global secret
@@ -9,8 +9,8 @@ import { binStrToTernStr } from './ternaryStringOperations';
  * @param secret global secret
  * @param hashFunc hashing function
  */
-export function hashBinArray(a: string, secret: string, hashFunc: any) {
-  let result = secret;
+export function hashBinArray(a: string, secret: string) {
+  const result = secret;
   // const ternary = binStrToTernStr(a);
   // for (const iterator of a) {
   //   result = hash(result + iterator.toString(), 1);
@@ -20,7 +20,7 @@ export function hashBinArray(a: string, secret: string, hashFunc: any) {
 export function hash(data: string, rounds: number = 81) {
   return converter.trytes(
     hashKerl(
-      rounds, //Removed the || statement with 81 as 81 is now default
+      rounds, // Removed the || statement with 81 as 81 is now default
       converter.trits(data.slice())
     ).slice()
   );
