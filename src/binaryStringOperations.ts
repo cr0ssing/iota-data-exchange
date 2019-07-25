@@ -11,7 +11,7 @@ export function buildStrBin(s: string, l: number): string {
     throw new Error();
   }
   let res = '';
-  const lenght = l ? l : 4;
+  const lenght = l;
   const diff = lenght > s.length ? lenght - s.length : 0;
   for (let i = 0; i < diff; i++) {
     res += '0';

@@ -9,4 +9,5 @@ module.exports = {
     '!**/node_modules/**',
     '!**/vendor/**',
   ],
+  testPathIgnorePatterns: ['src/index.ts'],
 };

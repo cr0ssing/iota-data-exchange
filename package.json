@@ -23,5 +23,8 @@
     "tslint-config-prettier": "^1.18.0",
     "eslint": "^6.1.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@iota/core": "^1.0.0-beta.20",
+    "@types/node": "^12.6.8"
+  }
 }

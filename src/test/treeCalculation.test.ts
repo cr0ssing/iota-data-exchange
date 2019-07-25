@@ -1,36 +1,13 @@
 import { getMinMaxRange } from '../binaryMinMax';
 import { buildStrBin, getDiff } from '../binaryStringOperations';
 import DateTag from '../DateTag';
-import { fromYears, getChildNodes, getNodesForHashing } from '../index';
+import {
+  fromYears,
+  getChildNodes,
+  getNodesForHashing,
+} from '../treeCalculation';
 import { EDateTagProps, EDay, EMonth, EYear } from '../typings/Date';
 
-describe('Binary number', () => {
-  const lenght = 3;
-
-  it('should have fixed lenght', () => {
-    const a = parseInt('1', 10).toString(2);
-    expect(buildStrBin(a, lenght).length).toBe(lenght);
-  }),
-    it('fill short numbers with zeros', () => {
-      const a = parseInt('1', 10).toString(2);
-      const result = buildStrBin(a, lenght);
-      expect(result.substr(0, lenght - 1)).toBe('00');
-      expect(result.length === lenght).toBe(true);
-    }),
-    it('do not fill long numbers with zeros', () => {
-      const a = parseInt('7', 10).toString(2);
-
-      const result = buildStrBin(a, lenght);
-      expect(result === a).toBe(true);
-      expect(result.length === lenght).toBe(true);
-    }),
-    it('throw error if to long', () => {
-      const a = parseInt('50', 10).toString(2);
-      expect(() => {
-        buildStrBin(a, lenght);
-      }).toThrowError(Error());
-    });
-});
 describe('Range calucaltion', () => {
   it('return correct min and max value', () => {
     const binStr = '010';
@@ -223,6 +200,22 @@ describe('Nodes from daterange', () => {
         '00011111100110100000XXX', // 2022-08-00    - 2022-08-07
         '0001111110011010000100X', // 2022-08-08    - 2022-08-09
         '00011111100110100001010', // 2022-08-10
+      ].sort()
+    );
+  });
+  it('specific daterange with two months', () => {
+    const dateStart = new DateTag(2019, 3, 5);
+    const dateEnd = new DateTag(2019, 4, 5);
+    const res = fromYears(dateStart, dateEnd);
+    expect(res.sort()).toStrictEqual(
+      [
+        '00011111100011001100101', // 2019-03-05
+        '0001111110001100110011X', // 2019-03-06 - 2019-03-07
+        '00011111100011001101XXX', // 2019-03-08 - 2019-03-15
+        '0001111110001100111XXXX', // 2019-03-16 - 2019-03-31
+        '000111111000110100000XX', // 2019-04-00 - 2019-04-04
+        '0001111110001101000010X', // 2019-04-05
+        '0001111110001101000010X', // 2019-04-05
       ].sort()
     );
   });

@@ -34,14 +34,4 @@ export default class DateTag implements IDateTag {
       (this.minute = minute ? minute : null),
       (this.second = second ? second : null);
   }
-  /**
-   * Gets path
-   * @author Raphael Manke
-   * @returns
-   */
-  public getPath() {
-    return (
-      this.year.toString(2) + this.month.toString(2) + this.day.toString(2)
-    );
-  }
 }
