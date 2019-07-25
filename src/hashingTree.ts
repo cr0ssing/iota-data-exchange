@@ -3,18 +3,26 @@ import * as converter from '@iota/converter';
 import Curl from '@iota/curl';
 import * as kerl from '@iota/kerl';
 import { binStrToTernStr } from './ternaryStringOperations';
+
 /**
  * Calculates the hash for a given path and global secret
  * @param a array of path
- * @param secret global secret
+ * @param startVal global secret
  * @param hashFunc hashing function
  */
-export function hashBinArray(a: string, secret: string) {
-  const result = secret;
-  // const ternary = binStrToTernStr(a);
-  // for (const iterator of a) {
-  //   result = hash(result + iterator.toString(), 1);
-  // }
+export function hashBinArray(a: string, startVal: string, tryte: boolean) {
+  let result;
+  if (tryte) {
+    result = startVal;
+  } else {
+    result = converter.asciiToTrytes(startVal);
+  }
+  const ternary = binStrToTernStr(a);
+  for (const iterator of a) {
+    const tern = converter.asciiToTrytes(iterator);
+    result = hash(result + tern);
+  }
+  return result;
 }
 
 export function hash(data: string, rounds: number = 81) {
