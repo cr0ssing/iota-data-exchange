@@ -15,16 +15,16 @@
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^24.0.15",
+    "@types/node": "^12.6.8",
+    "eslint": "^6.1.0",
     "jest": "^24.8.0",
-    "ts-jest": "^24.0.2",
-    "typescript": "^3.5.3",
     "prettier": "^1.18.2",
+    "ts-jest": "^24.0.2",
     "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.18.0",
-    "eslint": "^6.1.0"
+    "typescript": "^3.5.3"
   },
   "dependencies": {
-    "@iota/core": "^1.0.0-beta.20",
-    "@types/node": "^12.6.8"
+    "@iota/core": "^1.0.0-beta.20"
   }
 }
