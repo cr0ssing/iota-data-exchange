@@ -1,8 +1,5 @@
-import { Function } from '@babel/types';
 import * as converter from '@iota/converter';
 import Curl from '@iota/curl';
-import * as kerl from '@iota/kerl';
-import { binStrToTernStr } from './ternaryStringOperations';
 
 /**
  * Calculates the hash for a given path and global secret
@@ -17,27 +14,41 @@ export function hashBinArray(a: string, startVal: string, tryte: boolean) {
   } else {
     result = converter.asciiToTrytes(startVal);
   }
-  const ternary = binStrToTernStr(a);
   for (const iterator of a) {
-    const tern = converter.asciiToTrytes(iterator);
-    result = hash(result + tern);
+    const tern = result + converter.asciiToTrytes(iterator);
+    const ternTrints = converter.trytesToTrits(tern);
+    // result = hashKerl(ternTrints).toString();
   }
   return result;
 }
-
-export function hash(data: string, rounds: number = 81) {
-  return converter.trytes(
-    hashKerl(
-      rounds, // Removed the || statement with 81 as 81 is now default
-      converter.trits(data.slice())
-    ).slice()
-  );
+/**
+ * Hashes a value
+ * @param start start of the hashing
+ * @param add Trits that are beeing used for hashing
+ */
+export function hash(start: Int8Array, add: Int8Array) {
+  const split = add.length / 3;
+  let input = start;
+  let outTrits = new Int8Array(Curl.HASH_LENGTH);
+  for (let index = 0; index < add.length; index++) {
+    outTrits = hashKerl(input, add.slice(index, index + 1));
+    input = outTrits;
+  }
+  return outTrits;
 }
-export function hashKerl(rounds: number, ...keys): Int8Array {
-  const curl: Curl = new Curl(rounds);
-  const key: Int8Array = new Int8Array(Curl.HASH_LENGTH);
+/**
+ * TODO
+ * @param lenght
+ * @param trits
+ */
+export function hashKerl(trits: Int8Array, tritsAdd: Int8Array): Int8Array {
+  const curl: Curl = new Curl();
+  const outTrits = new Int8Array(Curl.HASH_LENGTH);
+
   curl.initialize();
-  keys.map(k => curl.absorb(k, 0, Curl.HASH_LENGTH));
-  curl.squeeze(key, 0, Curl.HASH_LENGTH);
-  return key;
+  // kerl.absorb(new Int8Array(Kerl.HASH_LENGTH), 0, Kerl.HASH_LENGTH);
+  curl.absorb(trits, 0, trits.length);
+  curl.absorb(tritsAdd, 0, tritsAdd.length);
+  curl.squeeze(outTrits, 0, Curl.HASH_LENGTH);
+  return outTrits;
 }
