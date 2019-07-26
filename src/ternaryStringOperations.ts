@@ -31,3 +31,22 @@ export function fillBinStr(s: number[]): number[] {
 export function binToNumberArray(s: string) {
   return s.split('').map(e => parseInt(e, 10));
 }
+/**
+ * Converts a number Array to trits
+ * @param s array of numbers
+ */
+export function numbArrToTrits(s: number[]) {
+  return Int8Array.of(...s);
+}
+
+/**
+ * build trits from binary array
+ * @param s binary string
+ */
+export function binStrToTrits(s: string) {
+  return numbArrToTrits(binToNumberArray(s));
+}
+
+export function asciiToTrits(s: string) {
+  return converter.trits(converter.asciiToTrytes(s));
+}

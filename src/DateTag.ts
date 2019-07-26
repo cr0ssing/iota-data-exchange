@@ -34,4 +34,14 @@ export default class DateTag implements IDateTag {
       (this.minute = minute ? minute : null),
       (this.second = second ? second : null);
   }
+  /**
+   * Get binary string of a date
+   */
+  public toBinStr() {
+    return `${this.year.toString(2)}${this.month.toString(
+      2
+    )}${this.day.toString(2)}${this.hour ? this.hour.toString(2) : ''}${
+      this.minute ? this.minute.toString(2) : ''
+    }`;
+  }
 }

@@ -1,5 +1,7 @@
 import * as converter from '@iota/converter';
 import Curl from '@iota/curl';
+import DateTag from './DateTag';
+import { asciiToTrits, binStrToTrits } from './ternaryStringOperations';
 
 /**
  * Calculates the hash for a given path and global secret
@@ -31,6 +33,10 @@ export function hash(start: Int8Array, add: Int8Array) {
   let input = start;
   let outTrits = new Int8Array(Curl.HASH_LENGTH);
   for (let index = 0; index < add.length; index++) {
+    if (index === add.length - 1) {
+      const val = converter.trytes(outTrits);
+      console.log(val);
+    }
     outTrits = hashKerl(input, add.slice(index, index + 1));
     input = outTrits;
   }
@@ -51,4 +57,31 @@ export function hashKerl(trits: Int8Array, tritsAdd: Int8Array): Int8Array {
   curl.absorb(tritsAdd, 0, tritsAdd.length);
   curl.squeeze(outTrits, 0, Curl.HASH_LENGTH);
   return outTrits;
+}
+/**
+ * Get the has for a Datetag
+ * @param secret global secret
+ * @param date DateTag
+ */
+export function hashFromDatetag(secret: string, date: DateTag) {
+  const tryteSecret = converter.asciiToTrytes(secret);
+  const tritsSecret = converter.trits(tryteSecret);
+  const dateStr = date
+    .toBinStr()
+    .split('')
+    .map(e => parseInt(e, 10));
+  const dateTrits = Int8Array.of(...dateStr);
+  const hashVal = hash(tritsSecret, dateTrits);
+  return converter.trytes(hashVal);
+}
+/**
+ * Gets Hash of secret and binary string
+ * @param secret global secret
+ * @param binStr binary string
+ */
+export function hashFromBinStr(secret: string, binStr: string) {
+  const secretTrits = asciiToTrits(secret);
+  const binTrits = binStrToTrits(binStr.replace('X', ''));
+  const hashVal = hash(secretTrits, binTrits);
+  return converter.trytes(hashVal);
 }
