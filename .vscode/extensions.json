@@ -7,6 +7,7 @@
     "xabikos.javascriptsnippets",
     "ryanluker.vscode-coverage-gutters",
     "orta.vscode-jest",
-    "andys8.jest-snippets"
+    "andys8.jest-snippets",
+    "gruntfuggly.todo-tree"
   ]
 }
