@@ -5,6 +5,7 @@ import { asciiToTrits, binStrToTrits } from './ternaryStringOperations';
 
 /**
  * Hashes a value
+ * TODO add tests
  * @param start start of the hashing
  * @param add Trits that are beeing used for hashing
  */
@@ -22,7 +23,7 @@ export function hash(start: Int8Array, add: Int8Array) {
   return outTrits;
 }
 /**
- * TODO
+ * TODO Add Describtion
  * @param lenght
  * @param trits
  */
