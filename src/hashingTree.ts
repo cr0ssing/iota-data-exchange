@@ -4,26 +4,6 @@ import DateTag from './DateTag';
 import { asciiToTrits, binStrToTrits } from './ternaryStringOperations';
 
 /**
- * Calculates the hash for a given path and global secret
- * @param a array of path
- * @param startVal global secret
- * @param hashFunc hashing function
- */
-export function hashBinArray(a: string, startVal: string, tryte: boolean) {
-  let result: string;
-  if (tryte) {
-    result = startVal;
-  } else {
-    result = converter.asciiToTrytes(startVal);
-  }
-  for (const iterator of a) {
-    const tern = result + converter.asciiToTrytes(iterator);
-    const ternTrints = converter.trytesToTrits(tern);
-    // result = hashKerl(ternTrints).toString();
-  }
-  return result;
-}
-/**
  * Hashes a value
  * @param start start of the hashing
  * @param add Trits that are beeing used for hashing
@@ -35,7 +15,6 @@ export function hash(start: Int8Array, add: Int8Array) {
   for (let index = 0; index < add.length; index++) {
     if (index === add.length - 1) {
       const val = converter.trytes(outTrits);
-      console.log(val);
     }
     outTrits = hashKerl(input, add.slice(index, index + 1));
     input = outTrits;
