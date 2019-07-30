@@ -16,7 +16,7 @@ export function hash(start: Int8Array, add: Int8Array) {
     if (index === add.length - 1) {
       const val = converter.trytes(outTrits);
     }
-    outTrits = hashKerl(input, add.slice(index, index + 1));
+    outTrits = hashCurl(input, add.slice(index, index + 1));
     input = outTrits;
   }
   return outTrits;
@@ -26,7 +26,7 @@ export function hash(start: Int8Array, add: Int8Array) {
  * @param lenght
  * @param trits
  */
-export function hashKerl(trits: Int8Array, tritsAdd: Int8Array): Int8Array {
+export function hashCurl(trits: Int8Array, tritsAdd: Int8Array): Int8Array {
   const curl: Curl = new Curl();
   const outTrits = new Int8Array(Curl.HASH_LENGTH);
 
