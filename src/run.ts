@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import DateTag from './DateTag';
 import { fromYears } from './treeCalculation';
 

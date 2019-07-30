@@ -73,8 +73,5 @@ describe('Hash from datetag', () => {
     const endHash = converter.trytes(hash(partResTrit, binStrToTrits('1')));
     const hasofEnd = hashFromDatetag(secret, dateEnd);
     expect(endHash).toBe(hasofEnd);
-    expect(res).toBe(
-      'TKKNDPSROSDMMTNCASMZWWYFJEGPMBYTHSBFDGBUQSLAFEWORMISMHLWTPCEAGRDVGWVZTUSEVQAFNATB'
-    );
   });
 });
