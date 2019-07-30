@@ -1,4 +1,5 @@
-import { IDateTag, IMonth, IYear } from './typings/Date';
+import { buildStrBin } from './binaryStringOperations';
+import { EDay, EMonth, EYear, IDateTag, IMonth, IYear } from './typings/Date';
 /**
  * Date tag
  * @author Raphael Manke
@@ -38,10 +39,10 @@ export default class DateTag implements IDateTag {
    * Get binary string of a date
    */
   public toBinStr() {
-    return `${this.year.toString(2)}${this.month.toString(
-      2
-    )}${this.day.toString(2)}${this.hour ? this.hour.toString(2) : ''}${
-      this.minute ? this.minute.toString(2) : ''
-    }`;
+    const year = buildStrBin(this.year.toString(2), EYear.depth);
+    const month = buildStrBin(this.month.toString(2), EMonth.depth);
+    const day = buildStrBin(this.day.toString(2), EDay.depth);
+    // TODO Extend to support hours and minutes
+    return year + month + day;
   }
 }

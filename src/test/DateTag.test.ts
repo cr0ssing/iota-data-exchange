@@ -29,3 +29,11 @@ describe('DateTag', () => {
     expect(dateTag.second).toBe(second);
   });
 });
+describe('Function of Datetage', () => {
+  it('should return binary representation of a datetag', () => {
+    const date = new DateTag(2019, 5, 10);
+    const binStr = '00011111100011010101010';
+    const res = date.toBinStr();
+    expect(res).toStrictEqual(binStr);
+  });
+});

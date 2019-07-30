@@ -1,8 +1,8 @@
 import * as converter from '@iota/converter';
-import { hash, hashFromDatetag, hashFromBinStr } from '../hashingTree';
 import DateTag from '../DateTag';
-import { fromYears } from '../treeCalculation';
+import { hash, hashFromBinStr, hashFromDatetag } from '../hashingTree';
 import { binStrToTrits } from '../ternaryStringOperations';
+import { fromYears } from '../treeCalculation';
 
 describe('Curl hashing', () => {
   it('should return the same hash', () => {
@@ -28,7 +28,7 @@ describe('Curl hashing', () => {
 
     expect(hashFromDate).toBe(hashFromDateStr);
   });
-  it('should buidl the same hash', () => {
+  it('should build the same hash', () => {
     const date = new DateTag(2019, 5, 2);
     const secret = 'HELLOWORLD';
 
@@ -49,8 +49,16 @@ describe('Hash from datetag', () => {
     const secret = 'HELLOWORLD';
     const res = hashFromDatetag(secret, date);
     expect(res).toBe(
-      'TKKNDPSROSDMMTNCASMZWWYFJEGPMBYTHSBFDGBUQSLAFEWORMISMHLWTPCEAGRDVGWVZTUSEVQAFNATB'
+      'RYWFCMQJUBDLWVRTIDDQLSFSNGVAOVLXMWDRYXCSNMCXNMIKBIKAXSPETFCFK9EKHIDIVJOR99YCNXVNI'
     );
+  });
+  it('should return the same as from binary string', () => {
+    const secret = 'HELLOWORLD';
+    const date = new DateTag(2019, 5, 1);
+    const binaryString = date.toBinStr();
+    const res1 = hashFromDatetag(secret, date);
+    const res2 = hashFromBinStr(secret, binaryString);
+    expect(res1).toStrictEqual(res2);
   });
   it('should return hashes for daterange', () => {
     const dateStart = new DateTag(2019, 5, 1);
@@ -60,7 +68,7 @@ describe('Hash from datetag', () => {
     const res = hashList.map(e => {
       return { key: e, val: hashFromBinStr(secret, e) };
     });
-    const partRes = res[1]['val'];
+    const partRes = res[1].val;
     const partResTrit = converter.trits(partRes);
     const endHash = converter.trytes(hash(partResTrit, binStrToTrits('1')));
     const hasofEnd = hashFromDatetag(secret, dateEnd);
