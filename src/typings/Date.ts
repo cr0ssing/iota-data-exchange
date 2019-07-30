@@ -28,16 +28,22 @@ export enum EYear {
   max = 16384,
   min = 0,
   depth = Math.ceil(Math.log2(max)),
+  posStart = 0,
+  posEnd = depth + posStart,
 }
 export enum EMonth {
   max = 15,
   min = 0,
   depth = Math.ceil(Math.log2(max)),
+  posStart = 14,
+  posEnd = 18,
 }
 export enum EDay {
   max = 31,
   min = 0,
   depth = Math.ceil(Math.log2(max)),
+  posStart = 18,
+  posEnd = 24,
 }
 
 export enum EDateTagProps {
