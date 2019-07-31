@@ -11,43 +11,43 @@ describe('HashStore constructor', () => {
   });
 });
 describe('Hasstore getters', () => {
+  const secret = 'MYSECRET';
+  const dateStart = new DateTag(2019, 5, 15);
+  const dateEnd = new DateTag(2019, 5, 20);
+  const dateRangePaths = fromYears(dateStart, dateEnd);
+  const hashList: IHashItem[] = dateRangePaths.map(p => {
+    return {
+      hash: hashFromBinStr(secret, p),
+      prefix: p,
+    };
+  });
+  const store = new HashStore(hashList);
+
   it('should return hashlist ', () => {
-    const hashList = [{ prefix: 'ABN', hash: 'ASDSAD' }];
-    const store = new HashStore(hashList);
     expect(store.getHashList()).toStrictEqual(hashList);
   });
-  it('should return hash for a Datetag', () => {
-    const secret = 'MYSECRET';
-    const dateStart = new DateTag(2019, 5, 15);
-    const dateEnd = new DateTag(2019, 5, 20);
-    const dateSearch = new DateTag(2019, 5, 18);
-    const dateRangePaths = fromYears(dateStart, dateEnd);
-    const hashList: IHashItem[] = dateRangePaths.map(p => {
-      return {
-        hash: hashFromBinStr(secret, p),
-        prefix: p,
-      };
-    });
-    const store = new HashStore(hashList);
-    const res = store.getHashFromDateTag(dateSearch);
-    expect(res.length).toStrictEqual(1);
-    expect(res[0].prefix).toStrictEqual('000111111000110101100XX');
-  });
   it('should return the min date of the hashe store', () => {
-    const secret = 'MYSECRET';
-    const dateStart = new DateTag(2019, 5, 15);
-    const dateEnd = new DateTag(2019, 5, 20);
-    const dateRangePaths = fromYears(dateStart, dateEnd);
-    const hashList: IHashItem[] = dateRangePaths.map(p => {
-      return {
-        hash: hashFromBinStr(secret, p),
-        prefix: p,
-      };
-    });
-    const store = new HashStore(hashList);
     const resMin = store.getMinDate();
     const resMax = store.getMaxDate();
     expect(resMin).toStrictEqual(dateStart);
     expect(resMax).toStrictEqual(dateEnd);
+  });
+  it('should return hash for a Datetag', () => {
+    const dateSearch = new DateTag(2019, 5, 18);
+    const res = store.getHashFromDateTag(dateSearch);
+    expect(res.length).toStrictEqual(1);
+    expect(res[0].prefix).toStrictEqual('000111111000110101100XX');
+  });
+  it('should throw Error if requested Date is before min Date in store', () => {
+    const dateSearch = new DateTag(2018, 5, 18);
+    expect(() => {
+      store.getHashFromDateTag(dateSearch);
+    }).toThrowError(Error('DateTag is not in range of this store'));
+  });
+  it('should throw Error if requested Date is after max Date in store', () => {
+    const dateSearch = new DateTag(2019, 12, 18);
+    expect(() => {
+      store.getHashFromDateTag(dateSearch);
+    }).toThrowError(Error('DateTag is not in range of this store'));
   });
 });

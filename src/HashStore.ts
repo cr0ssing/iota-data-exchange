@@ -36,16 +36,20 @@ export default class HashStore {
    * @param tag Datetag
    */
   public getHashFromDateTag(tag: DateTag): IHashItem[] {
-    const dateBin = tag.toBinStr();
-    for (let index = 0; index < dateBin.length; index++) {
-      const element = this.hashList.filter(e =>
-        e.prefix.startsWith(dateBin.substring(0, dateBin.length - index))
-      );
-      if (element.length > 0) {
-        return element;
+    if (tag.compare(this.minDate) >= 0 && tag.compare(this.maxDate) <= 0) {
+      const dateBin = tag.toBinStr();
+      for (let index = 0; index < dateBin.length; index++) {
+        const element = this.hashList.filter(e =>
+          e.prefix.startsWith(dateBin.substring(0, dateBin.length - index))
+        );
+        if (element.length > 0) {
+          return element;
+        }
       }
+      throw new Error('No hash prefix found');
+    } else {
+      throw new Error('DateTag is not in range of this store');
     }
-    throw new Error('No hash prefix found');
   }
   private setMinMaxRange() {
     const sortedList = this.hashList.sort((a, b) => {
