@@ -45,4 +45,29 @@ export default class DateTag implements IDateTag {
     // TODO Extend to support hours and minutes
     return year + month + day;
   }
+  /**
+   * compare
+   */
+  public compare(other: DateTag) {
+    // TODO Add minutes and seconds
+    if (this.year < other.year) {
+      return -1;
+    } else if (this.year > other.year) {
+      return 1;
+    } else {
+      if (this.month < other.month) {
+        return -1;
+      } else if (this.month > other.month) {
+        return 1;
+      } else {
+        if (this.day < other.day) {
+          return -1;
+        } else if (this.day > other.day) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    }
+  }
 }
