@@ -1,5 +1,5 @@
 import DateTag from './DateTag';
-import { hashFromBinStr } from './hashingTree';
+import { hashFromBinStr, hashFromDatetag } from './hashingTree';
 import HashStore from './HashStore';
 import { fromYears } from './treeCalculation';
 import { IHashItem } from './typings/HashStore';
@@ -10,7 +10,7 @@ describe('HashStore constructor', () => {
     expect(store).toBeDefined();
   });
 });
-describe('Hasstore getters', () => {
+describe('Hashstore getters', () => {
   const secret = 'MYSECRET';
   const dateStart = new DateTag(2019, 5, 15);
   const dateEnd = new DateTag(2019, 5, 20);
@@ -26,28 +26,37 @@ describe('Hasstore getters', () => {
   it('should return hashlist ', () => {
     expect(store.getHashList()).toStrictEqual(hashList);
   });
-  it('should return the min date of the hashe store', () => {
+  // TODO Add tests for different date ranges, e.g. min=201906XX
+  it('should return the min date of the hash store', () => {
     const resMin = store.getMinDate();
     const resMax = store.getMaxDate();
     expect(resMin).toStrictEqual(dateStart);
     expect(resMax).toStrictEqual(dateEnd);
   });
-  it('should return hash for a Datetag', () => {
+  it('should return hash for a valid Datetag', () => {
     const dateSearch = new DateTag(2019, 5, 18);
-    const res = store.getHashFromDateTag(dateSearch);
-    expect(res.length).toStrictEqual(1);
-    expect(res[0].prefix).toStrictEqual('000111111000110101100XX');
+    const res = store.getHashPrefixFromDateTag(dateSearch);
+    expect(res.prefix).toStrictEqual('000111111000110101100XX');
   });
   it('should throw Error if requested Date is before min Date in store', () => {
     const dateSearch = new DateTag(2018, 5, 18);
     expect(() => {
-      store.getHashFromDateTag(dateSearch);
+      store.getHashPrefixFromDateTag(dateSearch);
     }).toThrowError(Error('DateTag is not in range of this store'));
   });
   it('should throw Error if requested Date is after max Date in store', () => {
     const dateSearch = new DateTag(2019, 12, 18);
     expect(() => {
-      store.getHashFromDateTag(dateSearch);
+      store.getHashPrefixFromDateTag(dateSearch);
     }).toThrowError(Error('DateTag is not in range of this store'));
+  });
+  it('should calculate key for a datetag within store', () => {
+    const dateSearch = new DateTag(2019, 5, 16);
+    const key = store.getKeyFromDatetag(dateSearch);
+    const truth = hashFromDatetag(secret, dateSearch);
+    // expect(key).toStrictEqual(
+    //   'JPKRMRYIEGUNOKUQ9MD9MBABRDJLZHDWZVOE9USWSYDATZYZIGYXJRLKBLFQLAIGSZANXDGASXWCDTKZX'
+    // );
+    expect(key).toStrictEqual(truth);
   });
 });

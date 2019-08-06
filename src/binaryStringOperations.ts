@@ -33,7 +33,7 @@ export function appendStrVals(n: number, val: string) {
 }
 
 /**
- * TODO
+ * Calculates the diff of two parts of a Datetag e.g. months
  * @param s
  * @param e
  * @param prop
@@ -43,6 +43,7 @@ export function getDiff(
   e: DateTag | null,
   prop: string
 ): number[] {
+  // FIXME Why is the EMonth fixed? It should be flexible.
   const startEl = s !== null ? s[prop] : EMonth.min;
   const endEl = e !== null ? e[prop] : EMonth.max;
   let list = [];

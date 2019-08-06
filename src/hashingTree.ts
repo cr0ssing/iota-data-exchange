@@ -61,7 +61,7 @@ export function hashFromDatetag(secret: string, date: DateTag) {
  */
 export function hashFromBinStr(secret: string, binStr: string) {
   const secretTrits = asciiToTrits(secret);
-  const binTrits = binStrToTrits(binStr.replace('X', ''));
+  const binTrits = binStrToTrits(binStr.replace(/X/g, ''));
   const hashVal = hash(secretTrits, binTrits);
   return converter.trytes(hashVal);
 }

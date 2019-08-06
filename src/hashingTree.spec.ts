@@ -1,8 +1,8 @@
 import * as converter from '@iota/converter';
-import DateTag from '../DateTag';
-import { hash, hashFromBinStr, hashFromDatetag } from '../hashingTree';
-import { binStrToTrits } from '../ternaryStringOperations';
-import { fromYears } from '../treeCalculation';
+import DateTag from './DateTag';
+import { hash, hashFromBinStr, hashFromDatetag } from './hashingTree';
+import { binStrToTrits } from './ternaryStringOperations';
+import { fromYears } from './treeCalculation';
 
 describe('Curl hashing', () => {
   it('should return the same hash', () => {
@@ -40,6 +40,20 @@ describe('Curl hashing', () => {
       hash(converter.trits(hash2), binStrToTrits('1'))
     );
     expect(hash1).toBe(hash3);
+  });
+  it('should build the same hash when more than one bin val is added', () => {
+    const secret = 'MYSECRET';
+    const dateStr1 = '00011111100011010110010';
+    const dateStr2 = '000111111000110101100';
+    const hash1 = hashFromBinStr(secret, dateStr1);
+    const hash2 = hashFromBinStr(secret, dateStr2);
+    const hash3 = converter.trytes(
+      hash(converter.trits(hash2), binStrToTrits('10'))
+    );
+    expect(hash1).toBe(hash3);
+    expect(hash2).toStrictEqual(
+      'GUJPW9MANXHECYLGYSKGDNUU9XSVKEVRUK9PNFVAUQAGVXDUXUYBWCFOURLJYS9NFSMOUJUSQYOQMGVZT'
+    );
   });
 });
 
