@@ -36,6 +36,16 @@ export default class DateTag implements IDateTag {
       (this.second = second ? second : null);
   }
   /**
+   * toString
+   */
+  public toString() {
+    const year = this.year.toString();
+    const month = this.month.toString();
+    const day = this.day.toString();
+    // TODO Extend to support hours and minutes
+    return year + month + day;
+  }
+  /**
    * Get binary string of a date
    */
   public toBinStr() {

@@ -2,16 +2,16 @@
 
 import DateTag from './DateTag';
 import { fromYears } from './treeCalculation';
+import { EDataTypes, IRequestMsg } from './typings/messages/WelcomeMsg';
 
 const dateStart = new DateTag(2019, 4, 1);
 const dateEnd = new DateTag(2020, 5, 3);
+const requestMsg: IRequestMsg = {
+  dataType: EDataTypes.heartRate,
+  endDate: dateEnd,
+  nextAddress: 'ABS',
+  pubKey: 'PUB',
+  startDate: dateStart,
+};
 
-fromYears(dateStart, dateEnd).map(e => {
-  console.log(e);
-  console.log(e.substring(0, 14));
-  console.log('year: ' + parseInt(e.substring(0, 14), 2));
-  console.log(e.substring(14, 18));
-  console.log('Month: ' + parseInt(e.substring(14, 18), 2));
-  console.log(e.substring(18, 23));
-  console.log('Day: ' + parseInt(e.substring(18, 23), 2));
-});
+console.log(requestMsg);

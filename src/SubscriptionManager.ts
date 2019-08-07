@@ -1,13 +1,22 @@
+import { API, composeAPI } from '@iota/core';
 import { ntru } from 'ntru';
+import { generateSeed } from './iotaUtils';
 import SubscriptionStore from './SubscriptionStore';
 export default class SubscriptionManager {
+  public iota: API;
+  public subscriptionRequestAddress =
+    'AAAAAWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDDDKYVEVAEX';
   private keyPair: IKeyPair;
+  private seed: string;
   private masterSecret: string;
   private subscriptionsStore: SubscriptionStore;
-  constructor(masterSecret: string, keyPair?: IKeyPair) {
+  constructor(masterSecret: string, keyPair?: IKeyPair, seed?: string) {
     this.masterSecret = masterSecret;
     if (keyPair) {
       this.keyPair = keyPair;
+    }
+    if (seed) {
+      this.seed = generateSeed();
     }
     this.subscriptionsStore = new SubscriptionStore([]);
   }
@@ -22,10 +31,31 @@ export default class SubscriptionManager {
   }
 
   /**
+   * connectToTangle
+   */
+  public connectToTangle() {
+    this.iota = composeAPI({
+      provider: 'https://nodes.thetangle.org:443',
+    });
+  }
+  /**
    * getPubKey
    */
   public getPubKey() {
-    return this.keyPair;
+    try {
+      return this.keyPair.publicKey;
+    } catch {
+      return undefined;
+    }
+  }
+  /**
+   * fetchSubscriptionRequests
+   */
+  public async fetchSubscriptionRequests() {
+    const transactions = await this.iota.findTransactions({
+      addresses: [this.subscriptionRequestAddress],
+    });
+    return transactions;
   }
 }
 

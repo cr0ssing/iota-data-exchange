@@ -1,7 +1,9 @@
+import { asciiToTrytes } from '@iota/converter';
 import SubscriptionManager, { IKeyPair } from './SubscriptionManager';
+
 const masterSecret = 'HELLOWORLD';
 describe('Constructor', () => {
-  let res;
+  let res: SubscriptionManager;
   beforeEach(() => {
     res = new SubscriptionManager(masterSecret);
   });
@@ -25,5 +27,26 @@ describe('Constructor', () => {
   });
   it('should create no a keypair', async () => {
     expect(res.getPubKey()).toBe(undefined);
+  });
+  it('should coonect to tangle', async () => {
+    res.connectToTangle();
+    const nodeInfo = await res.iota.getNodeInfo();
+    expect(nodeInfo).not.toBe(undefined);
+  });
+});
+describe('Fetching Access Requests from Tangle', () => {
+  let res: SubscriptionManager;
+  beforeEach(() => {
+    res = new SubscriptionManager(masterSecret);
+    res.init();
+    res.connectToTangle();
+  });
+
+  it('should return a transaction', async () => {
+    const trans = await res.fetchSubscriptionRequests();
+    const pub = res.getPubKey().toString();
+
+    const pubTryte = asciiToTrytes(pub);
+    expect(trans).toBe([]);
   });
 });
