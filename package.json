@@ -31,7 +31,10 @@
     "@iota/converter": "^1.0.0-beta.19",
     "@iota/core": "^1.0.0-beta.20",
     "@iota/curl": "^1.0.0-beta.19",
+    "@iota/extract-json": "^1.0.0-beta.21",
     "@iota/kerl": "^1.0.0-beta.19",
-    "ntru": "^3.1.8"
+    "crypto-js": "^3.1.9-1",
+    "ntru": "^3.1.8",
+    "one-time-pad": "^1.0.3"
   }
 }

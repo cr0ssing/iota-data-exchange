@@ -1,5 +1,9 @@
 import { asciiToTrytes } from '@iota/converter';
+import { notDeepEqual } from 'assert';
+import DateTag from './DateTag';
 import SubscriptionManager, { IKeyPair } from './SubscriptionManager';
+import { ISubscription } from './SubscriptionStore';
+import { EDataTypes } from './typings/messages/WelcomeMsg';
 
 const masterSecret = 'HELLOWORLD';
 describe('Constructor', () => {
@@ -45,8 +49,28 @@ describe('Fetching Access Requests from Tangle', () => {
   it('should return a transaction', async () => {
     const trans = await res.fetchSubscriptionRequests();
     const pub = res.getPubKey().toString();
-
-    const pubTryte = asciiToTrytes(pub);
-    expect(trans).toBe([]);
+    let msgs = [];
+    trans.forEach((val, key, map) => {
+      const decrMsg = res.decryptRequestBundel(val);
+      msgs = [...msgs, decrMsg];
+    });
+    // expect(trans).toBe([]);
+  });
+});
+describe('Sending Request accept message', () => {
+  it('should create a valid message', async () => {
+    const manager = new SubscriptionManager(masterSecret);
+    await manager.init();
+    await manager.connectToTangle();
+    const subscription: ISubscription = {
+      dataType: EDataTypes.heartRate,
+      endDate: new DateTag(2019, 9, 10),
+      id: 'ABC',
+      pubKey:
+        'AAAAAWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDDDKYVEVAEX',
+      startDate: new DateTag(2019, 7, 15),
+    };
+    const msg = await manager.sentRequestAcceptMsg(subscription);
+    expect(msg).not.toBe('');
   });
 });

@@ -92,7 +92,9 @@ export function getNodesForHashing(
     return allHashing;
   }
 }
-
+export function getNodesBetween(s: DateTag, e: DateTag) {
+  return fromYears(s, e);
+}
 /**
  * Todo
  * @param s

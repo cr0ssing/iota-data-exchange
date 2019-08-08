@@ -16,7 +16,7 @@ describe('Add Subbscription', () => {
     const subscript: ISubscription = {
       dataType: EDataTypes.heartRate,
       endDate: new DateTag(2019, 10, 13),
-      id: 1,
+      id: '1',
       pubKey: 'PUBKEY',
       startDate: new DateTag(2019, 10, 12),
     };

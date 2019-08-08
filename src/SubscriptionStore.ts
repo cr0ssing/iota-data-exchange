@@ -21,13 +21,13 @@ export default class SubscriptionStore {
   /**
    * removeSubscription
    */
-  public removeSubscription(id: number): void {
+  public removeSubscription(id: string): void {
     this.subs = this.subs.filter(e => e.id !== id);
   }
 }
 
 export interface ISubscription {
-  id: number;
+  id: string;
   startDate: DateTag;
   endDate: DateTag;
   dataType: EDataTypes;
