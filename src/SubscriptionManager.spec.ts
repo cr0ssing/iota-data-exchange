@@ -73,4 +73,22 @@ describe('Sending Request accept message', () => {
     const msg = await manager.sentRequestAcceptMsg(subscription);
     expect(msg).not.toBe('');
   });
+  it('should encrypt tag an message', async () => {
+    const manager = new SubscriptionManager(masterSecret);
+    const tag = 'FCWBFC9CYBPBYBYBPBVBZBPBCB9';
+    const secret = 'SomeSecret';
+    await manager.init();
+    await manager.connectToTangle();
+    const subscription: ISubscription = {
+      dataType: EDataTypes.heartRate,
+      endDate: new DateTag(2019, 9, 10),
+      id: 'ABC',
+      pubKey:
+        'AAAAAWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDDDKYVEVAEX',
+      startDate: new DateTag(2019, 7, 15),
+    };
+    const msg = await manager.sentRequestAcceptMsg(subscription);
+    const decTag = await manager.decrypt(msg[0].tag.replace(/9*$/g, ''));
+    expect(msg).toBe('');
+  });
 });

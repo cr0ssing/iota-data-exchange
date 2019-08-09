@@ -1,5 +1,6 @@
+import { ntru } from 'ntru';
 import DateTag from './DateTag';
-import { dateTagFromBinStr } from './helpers';
+import { dateTagFromBinStr, decryptTag, encryptTag } from './helpers';
 import { EFillOptions } from './typings/Constants';
 
 describe('Datetag from binary string generation', () => {
@@ -13,5 +14,18 @@ describe('Datetag from binary string generation', () => {
     const resMax = dateTagFromBinStr(dateBinCheck, EFillOptions.MAX);
     expect(resMin).toStrictEqual(dateMin);
     expect(resMax).toStrictEqual(dateMax);
+  });
+});
+describe('Encrypt tag', () => {
+  it('should create a full sized Tag element', async () => {
+    const keyPair = await ntru.keyPair();
+    const tagString = 'TagVeryyLongStringBecauseitissecure';
+    const encTag = await encryptTag(
+      tagString,
+      keyPair.publicKey,
+      keyPair.privateKey
+    );
+    const decTag = await decryptTag(encTag, keyPair.privateKey);
+    expect(encTag).toBe(decTag);
   });
 });

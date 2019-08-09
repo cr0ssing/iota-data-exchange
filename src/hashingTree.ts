@@ -9,10 +9,14 @@ import { asciiToTrits, binStrToTrits } from './ternaryStringOperations';
  * @param start start of the hashing
  * @param add Trits that are beeing used for hashing
  */
-export function hash(start: Int8Array, add: Int8Array) {
+export function hash(
+  start: Int8Array,
+  add: Int8Array,
+  hashLenght = Curl.HASH_LENGTH
+) {
   const split = add.length / 3;
   let input = start;
-  let outTrits = new Int8Array(Curl.HASH_LENGTH);
+  let outTrits = new Int8Array(hashLenght);
   for (let index = 0; index < add.length; index++) {
     if (index === add.length - 1) {
       const val = converter.trytes(outTrits);
@@ -27,15 +31,21 @@ export function hash(start: Int8Array, add: Int8Array) {
  * @param lenght
  * @param trits
  */
-export function hashCurl(trits: Int8Array, tritsAdd: Int8Array): Int8Array {
+export function hashCurl(
+  trits: Int8Array,
+  tritsAdd?: Int8Array,
+  hashLenght?: number
+): Int8Array {
   const curl: Curl = new Curl();
-  const outTrits = new Int8Array(Curl.HASH_LENGTH);
-
+  const lenght = hashLenght ? hashLenght : Curl.HASH_LENGTH;
+  const outTrits = new Int8Array(lenght);
   curl.initialize();
   // kerl.absorb(new Int8Array(Kerl.HASH_LENGTH), 0, Kerl.HASH_LENGTH);
   curl.absorb(trits, 0, trits.length);
-  curl.absorb(tritsAdd, 0, tritsAdd.length);
-  curl.squeeze(outTrits, 0, Curl.HASH_LENGTH);
+  if (tritsAdd) {
+    curl.absorb(tritsAdd, 0, tritsAdd.length);
+  }
+  curl.squeeze(outTrits, 0, lenght);
   return outTrits;
 }
 /**

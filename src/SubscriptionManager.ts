@@ -1,12 +1,14 @@
 import {
   asciiToTrytes,
   bytesToTrits,
+  tritsToBytes,
   tritsToTrytes,
   trytesToAscii,
+  trytesToTrits,
 } from '@iota/converter';
 import { API, Bundle, composeAPI, errors, Transaction } from '@iota/core';
 import * as iotaJson from '@iota/extract-json';
-import { SHA3 } from 'crypto-js';
+import { AES, SHA3 } from 'crypto-js';
 import { ntru } from 'ntru';
 import DateTag from './DateTag';
 
@@ -14,6 +16,7 @@ import { hashFromBinStr } from './hashingTree';
 import { groupBy, uniqueBundelHashes } from './helpers';
 import { generateSeed, sentMsgToTangle } from './iotaUtils';
 import SubscriptionStore, { ISubscription } from './SubscriptionStore';
+import { asciiToTrits } from './ternaryStringOperations';
 import { getNodesBetween } from './treeCalculation';
 import { IHashItem } from './typings/HashStore';
 import { IRequestMsg } from './typings/messages/WelcomeMsg';
@@ -108,24 +111,40 @@ export default class SubscriptionManager {
     const hashList = this.getNodeHashesForDaterange(sub.startDate, sub.endDate);
     // encrypt the symetric key of the data with the pubKey
     // TODO make secret changeable
-    const encMsg = await ntru.encrypt(
-      asciiToTrytes('SomeSecret'),
-      this.keyPair.publicKey
-    );
-    const hashListEnc = SHA3(
+    const secret = 'SomeSecret';
+    const secretTrits = asciiToTrits('SomeSecret');
+    const secretBytes = tritsToBytes(secretTrits);
+    const secretUint = Uint8Array.from(secretBytes);
+    const encTag = await ntru.encrypt(secretUint, this.keyPair.publicKey);
+    const encdecTag = await ntru.decrypt(encTag, this.keyPair.privateKey);
+    const decBuffer = Buffer.from(encdecTag);
+    const decTrits = bytesToTrits(decBuffer);
+    const compSecDec = secretTrits.toString() === decTrits.toString();
+    const decStr = trytesToAscii(tritsToTrytes(decTrits));
+    const comp = encdecTag.toString() === secretUint.toString();
+    // const encdecTagTryte = tritsToTrytes(encdecTagString);
+    const hashListEnc = AES.encrypt(
       JSON.stringify(hashList),
-      'someSecretthatsisdaverylidgasdpojklsa'
+      encTag.toString()
     );
-    const msgBuffer = Buffer.from(encMsg.buffer);
+    const tagBuffer = Buffer.from(encTag.buffer);
     const address = sub.pubKey;
     const msg = await sentMsgToTangle(
       this.iota,
       this.seed,
       address,
       hashListEnc.toString(),
-      tritsToTrytes(bytesToTrits(msgBuffer))
+      tritsToTrytes(bytesToTrits(tagBuffer))
     );
     return msg;
+  }
+  /**
+   * decrypt
+   */
+  public async decrypt(msg: string) {
+    const msgBuffer = tritsToBytes(trytesToTrits(msg));
+    const decMsg = await ntru.decrypt(msgBuffer, this.keyPair.privateKey);
+    return decMsg;
   }
   private getNodeHashesForDaterange(s: DateTag, e: DateTag) {
     const dateRangePaths = getNodesBetween(s, e);

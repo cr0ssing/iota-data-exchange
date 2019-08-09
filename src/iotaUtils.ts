@@ -1,6 +1,7 @@
 import { asciiToTrytes } from '@iota/converter';
 import { Address, API, Transfer } from '@iota/core/typings/core/src';
 import { Trytes } from '@iota/core/typings/types';
+import { Bundle } from '@iota/http-client/typings/types';
 
 export function generateSeed(length = 81) {
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9';
@@ -20,7 +21,7 @@ export async function sentMsgToTangle(
   tag: string,
   depth: number = 3,
   mwm: number = 14
-) {
+): Promise<Bundle> {
   const transfers: Transfer[] = [
     {
       address,
