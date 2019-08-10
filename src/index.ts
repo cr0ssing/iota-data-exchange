@@ -1,7 +1,7 @@
 import { Transfer } from '@iota/core/typings/types';
 import * as IotaJson from '@iota/extract-json';
 import DateTag from './DateTag';
-import * as ntru from './ntru';
+import * as ntru from '@decentralized-auth/ntru';
 import { EDataTypes, IRequestMsg } from './typings/messages/WelcomeMsg';
 /* istanbul ignore file */
 
@@ -10,10 +10,18 @@ import { EDataTypes, IRequestMsg } from './typings/messages/WelcomeMsg';
 // const Converter = require('@iota/converter');
 const seed = 'MYIOTASEED';
 const keyPair = ntru.createKeyPair(seed);
-const plainText = Buffer.from('hello', 'utf8');
-const encrypted = ntru.encrypt(plainText, ntru.toTrytes(keyPair.public));
-const decrypted = ntru.decrypt(encrypted, keyPair.private).toString();
-console.log(encrypted, decrypted);
+const pub = keyPair.public;
+const pubTryte = ntru.toTrytes(keyPair.public);
+const plainText = Buffer.from(
+  'helloWorldFromAVERylongStringshouldchange',
+  'utf8'
+);
+const encrypted: string = ntru.encrypt(
+  plainText,
+  ntru.toTrytes(keyPair.public)
+);
+const decrypted: string = ntru.decrypt(encrypted, keyPair.private).toString();
+console.log(encrypted, decrypted, encrypted.length);
 // Create a new instance of the IOTA object
 // Use the `provider` field to specify which IRI node to connect to
 // const iota = Iota.composeAPI({

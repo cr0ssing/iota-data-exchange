@@ -9,7 +9,6 @@ import {
 import { API, Bundle, composeAPI, errors, Transaction } from '@iota/core';
 import * as iotaJson from '@iota/extract-json';
 import { AES, SHA3 } from 'crypto-js';
-import { ntru } from 'ntru';
 import DateTag from './DateTag';
 
 import { hashFromBinStr } from './hashingTree';
@@ -20,6 +19,8 @@ import { asciiToTrits } from './ternaryStringOperations';
 import { getNodesBetween } from './treeCalculation';
 import { IHashItem } from './typings/HashStore';
 import { IRequestMsg } from './typings/messages/WelcomeMsg';
+import * as ntru from '@decentralized-auth/ntru';
+import { KeyPair } from '@decentralized-auth/ntru';
 export default class SubscriptionManager {
   public iota: API;
   public subscriptionRequestAddress =
@@ -30,7 +31,7 @@ export default class SubscriptionManager {
   private subscriptionsStore: SubscriptionStore;
   private rejectedRequests: Map<string, Transaction>;
   private requestStore: string[];
-  constructor(masterSecret: string, keyPair?: IKeyPair, seed?: string) {
+  constructor(masterSecret: string, keyPair?: KeyPair, seed?: string) {
     this.masterSecret = masterSecret;
     if (keyPair) {
       this.keyPair = keyPair;
@@ -47,7 +48,7 @@ export default class SubscriptionManager {
     if (this.keyPair !== undefined) {
       throw Error('Keypair already set');
     }
-    this.keyPair = await ntru.keyPair();
+    this.keyPair = await ntru.createKeyPair(this.seed);
   }
 
   /**
@@ -61,9 +62,11 @@ export default class SubscriptionManager {
   /**
    * getPubKey
    */
-  public getPubKey() {
+  public getPubKey(asTrytes = true): string | Uint8Array | undefined {
     try {
-      return this.keyPair.publicKey;
+      return asTrytes
+        ? ntru.toTrytes(this.keyPair.public)
+        : this.keyPair.public;
     } catch {
       return undefined;
     }
@@ -112,11 +115,12 @@ export default class SubscriptionManager {
     // encrypt the symetric key of the data with the pubKey
     // TODO make secret changeable
     const secret = 'SomeSecret';
+    const encSecret = ntru;
     const secretTrits = asciiToTrits('SomeSecret');
     const secretBytes = tritsToBytes(secretTrits);
     const secretUint = Uint8Array.from(secretBytes);
-    const encTag = await ntru.encrypt(secretUint, this.keyPair.publicKey);
-    const encdecTag = await ntru.decrypt(encTag, this.keyPair.privateKey);
+    const encTag = await ntru.encrypt(secretUint, this.keyPair.public);
+    const encdecTag = await ntru.decrypt(encTag, this.keyPair.private);
     const decBuffer = Buffer.from(encdecTag);
     const decTrits = bytesToTrits(decBuffer);
     const compSecDec = secretTrits.toString() === decTrits.toString();
@@ -143,7 +147,7 @@ export default class SubscriptionManager {
    */
   public async decrypt(msg: string) {
     const msgBuffer = tritsToBytes(trytesToTrits(msg));
-    const decMsg = await ntru.decrypt(msgBuffer, this.keyPair.privateKey);
+    const decMsg = await ntru.decrypt(msgBuffer, this.keyPair.private);
     return decMsg;
   }
   private getNodeHashesForDaterange(s: DateTag, e: DateTag) {
@@ -163,9 +167,4 @@ export default class SubscriptionManager {
   private updateRequestTransactions(transList: string[]) {
     this.requestStore = transList;
   }
-}
-
-export interface IKeyPair {
-  privateKey: Uint8Array;
-  publicKey: Uint8Array;
 }
