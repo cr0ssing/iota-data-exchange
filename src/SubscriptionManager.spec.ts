@@ -1,33 +1,69 @@
-import { asciiToTrytes } from '@iota/converter';
-import { notDeepEqual } from 'assert';
+import { KeyPair } from '@decentralized-auth/ntru';
 import DateTag from './DateTag';
-import SubscriptionManager, { IKeyPair } from './SubscriptionManager';
+import SubscriptionManager from './SubscriptionManager';
 import { ISubscription } from './SubscriptionStore';
 import { EDataTypes } from './typings/messages/WelcomeMsg';
+const seed =
+  'HEEAXLXPIDUFFTLGNKQQYUNTRRCTYRSFOOFXGQRKNVEPGXWLURNXZPFCBVBCZRAKRMSXAGTNLTXMRPYDC';
 
 const masterSecret = 'HELLOWORLD';
 describe('Constructor', () => {
   let res: SubscriptionManager;
   beforeEach(() => {
-    res = new SubscriptionManager(masterSecret);
+    res = new SubscriptionManager({ masterSecret });
   });
   it('should return Manager Object', () => {
     // TODO add Test for Constructor
     expect(true);
   });
   it('should be initilized with keypair', async () => {
-    const keypair: IKeyPair = {
-      privateKey: new Uint8Array(),
-      publicKey: new Uint8Array(),
+    const keypair: KeyPair = {
+      private: new Uint8Array(),
+      public: new Uint8Array(),
     };
 
-    const store = new SubscriptionManager(masterSecret, keypair);
+    const store = new SubscriptionManager({ masterSecret, keyPair: keypair });
 
     await expect(store.init()).rejects.toThrowError();
   });
   it('should create a keypair', async () => {
     await res.init();
     expect(res.getPubKey()).not.toBe(undefined);
+  });
+  it('should create a keypair from seed', async () => {
+    const seed =
+      'HEEAXLXPIDUFFTLGNKQQYUNTRRCTYRSFOOFXGQRKNVEPGXWLURNXZPFCBVBCZRAKRMSXAGTNLTXMRPYDC';
+    const manager = new SubscriptionManager({
+      masterSecret,
+      keyPair: null,
+      seed,
+    });
+    await manager.init();
+    const pubKey = manager.getPubKey();
+    // expect(pubKey).not.toBe(undefined);
+    expect(pubKey).toBe(
+      'KB9CWBKBLBWCNBFCGDRBRBGCTAYAXBHDQCZCADBDHDHDVBZCZBZATCFDDCUAKBIDMBPBDD9CKDWCHDVBIDBCZCVCHCBDWAEDEDEDEDOBXCABTAIDZCZBBBGDUARBHD9CQCYCCDWBUBWBIDDCWBZBPBCBNDCBFCVBQBPCTCQBDCSBYBIDABQB9BWBXCCBBDCDWBWCFCNBCBUBADWCIDDC9CVAADBDZANDICIDTAUBUAADVASBLDFDTAYCVBTAZCTBIDKDMBYANDGCFCADXAOBPBXCXCZAGDRBTAKDUAKDEDHDNDHCCDTCZAMDSBWBEDXBFCNBTBPAYBQCCDRCTCXBFDECVBPCFC9DRBSCCDQBLDFDTBKBICTCVCLBVBSBEDWCNBFCICZADC9CECNDMDBDYAEDABABFCJDWCNBCDCDDCWCMDYCWCBDGCTBGCFDNDDDICVCZCICUBSBBBVAVCYAMDXBEDECMBUADCRCBDWAICKBPBLBSCPAWCOBWBRCICVCGCYBLDYAHDYBTAMBBCFDCCHDVACDCCQCICBCUBVANBJD9CWBWBCBFDZBDCUCZCTCMBQCPCXAUAACCDYAJDNDTBWCCCEDNDXCYBKDNDNBWABDUAXCUBPCIDZBKDABGCDCUAGDKDWATCYCFCVAFCXAVCWAXACBYCWCADHDVCQCWADCBDICYBRC9BACJD9DLDMBYBPBRBWBICMBNBKDSBVBQC9CADHDADCDABDCSCWAUCSCQCHCCBZAACTCICRCXAECIDUCXBTCQCXBVCWCTCVAACKDWA9CBDZAGCIDHCTCLDRBXACDYBKDIDWCTBUCFDVBGCTCUBTBUBUCPABBFDPBQCXCFCICGDNBKBPARCACQBCCPCCBXBSCDC9BCBZB9DRCTBOBBCOBADXACCPBZBVAKD9DCBWBNDXB9CVBDCXBBCZCBDCBCDTBXAPAHDZBLD9BCCCCEDGDDDECWBMBMBMDBBOBNDRCVAADADUCIDCBXBKD9BSCPCZC9BEC9DWAZCZAYBACTCEDUARCFCHDSCFDABYCVABDXBNDMDRCTAABEDUCFDYAYCAB9BBBGDKBVCMD9DIDUCJDPCNBWBSBXCKBWBKBUBTCACSBFDECBCZCZCYCCDEDSCPBTAYABCVCYAXBUBFCWCFDYC9CKBNDVBCBWBTBBCUAFDXBNDCCTCHDTBQCZCXBCBVCXBFCFCPBCDUCXBADEDWAQCXAACVCICPBBBNBPCJDYBPAACDCTBCCBCKDLBUACD9DZANBSBWAGDYCABFCJDQBECDCHDACDCUCMBMBZB9DECRBABTBABEDDDFDSCTAWCVATAVCKBCDBCVBMDCCACSCFDCCMD9DABLBXCCBSC9CRCSCLBPBTAGDVC9D9CVCKDXBWAYBZACCNBZADCQCZBWCSBCDHDTCZCKBHCCBMBGDYAGDGCZBVCEDECUCLDWA9CNDXBRBHCSBIDPC9CMBXAPBACEDQB9BBDBBLBKDCBLDBCZBACTADDICZCWAWALBZBTCZCTBRCGDEDZBBDHDUCICVBVCTCYBVCXAEC9BWBFDCBWCPCCBPCUBLBMDVBABXBQBNBWCQCCDPCQCMBHDMDKDICJDLDMDXC9DNDYCACLBKDVBABLDQBVABDGDUCABBCHDYBWAYCQCOBCBECKDDCUAABIDJDXARBWCBBFDRBDCECVBEDACXBCDUCZA9BZAXB9DICIDSCXAKBMDDDBCRCSBICMDZCMDRCKDICVCSBFDLBVCOB9DCDVAVAGDHCPBOBLDNDKBWBBDNBPBQB9DNBHCJDFCHCIDCDWA9DSCYATBMDFDVCWAHCFDACMBGCXCRBCDVBOBYCSCXBRBGDADFCYAACXCBCKD9DMB9CYBYA9CZBUABCPCGD9CWCCCXCHDFCYAFDEDACBBRBXCKBVBSBSBJDTCGCBDPBUACBHDUBWBKDUASBDCOBGDRCGDUBWAPASBZAQBEDABOB9DWCMDTAUCAD9DTCVBHDTBUBMDWB9DNDHCBCEDBCUA9DVAIDTCZCLBTBTCABZBQCXBACZAWBMDNBNBEDGDSCWATCEDGCZCACADACYAFCADYBBBMBKBNBYCFCJDXCFDCBACHCPATCADVBFCRBADHDXAZCCDBCABPCMDWCLBRBYCYAYCDCPCYBDCQBNBDCBDNBVCECGDPCWCABMBVBSBJDHDWBEDCBXAKDDDXAIDZBDDUCMBDDZCWASCADWAWBPANDCDCCBDECXAFCOBYCXBWB9CNBNDVCTCWBMBQBQBTALBOBBBDDYAWAHDUAFCXCRCADWBWBFCBBKDLDSCMDWARCVBECTCADPBYB9BSBUBTA9BLDDDUBVCXCBCDCWCHCPBPBDDCB9D9DTBBBECGCEDXBWBRCADYB9DVAJDZA9DOBZAWAYCMBNBYBZAXAVAQCHDAC9DFDQBUAZBPBYCYANDYAXASCTAJDXBLBTCZBXCACBDVCBBTBXANDOBUBPBYBPBCD9CBBFDSCWAXCSCVCCCGDXATANDVCTCCDIDKBBCKB9CACOBYCOBUCQBBCUANBVBECQBHCXAWALDDCQCCCTBBCBBDDEDUCWCXCPATCMBPAWBLBWBRBTBUAFCCBJDNDJDXBVADDHDIDWBYBTBFCIDQB9DIDYBZBHDADLBYBNBTAYAWAVBXAADBBLBQCCCGD9DADTBNDBCOBMBKBSBECKBUAFDRBJDQCCBBDYAUAZATBWAVBBCSCTBMBKBGBGB'
+    );
+  });
+  it('should create the same pubKey from same seed', async () => {
+    const seed =
+      'HEEAXLXPIDUFFTLGNKQQYUNTRRCTYRSFOOFXGQRKNVEPGXWLURNXZPFCBVBCZRAKRMSXAGTNLTXMRPYDC';
+    const manager = new SubscriptionManager({
+      masterSecret,
+      keyPair: null,
+      seed,
+    });
+    await manager.init();
+    const manager2 = new SubscriptionManager({
+      masterSecret,
+      keyPair: null,
+      seed,
+    });
+    await manager2.init();
+    const pubKey = manager.getPubKey();
+    const pubKey2 = manager.getPubKey();
+    // expect(pubKey).not.toBe(undefined);
+    expect(pubKey).toStrictEqual(pubKey2);
   });
   it('should create no a keypair', async () => {
     expect(res.getPubKey()).toBe(undefined);
@@ -38,28 +74,25 @@ describe('Constructor', () => {
     expect(nodeInfo).not.toBe(undefined);
   });
 });
+
 describe('Fetching Access Requests from Tangle', () => {
   let res: SubscriptionManager;
   beforeEach(() => {
-    res = new SubscriptionManager(masterSecret);
+    res = new SubscriptionManager({ masterSecret });
     res.init();
     res.connectToTangle();
   });
-
-  it('should return a transaction', async () => {
-    const trans = await res.fetchSubscriptionRequests();
-    const pub = res.getPubKey().toString();
-    let msgs = [];
-    trans.forEach((val, key, map) => {
-      const decrMsg = res.decryptRequestBundel(val);
-      msgs = [...msgs, decrMsg];
-    });
-    // expect(trans).toBe([]);
-  });
 });
+
 describe('Sending Request accept message', () => {
   it('should create a valid message', async () => {
-    const manager = new SubscriptionManager(masterSecret);
+    jest.setTimeout(30000);
+
+    const manager = new SubscriptionManager({
+      masterSecret,
+      keyPair: undefined,
+      seed,
+    });
     await manager.init();
     await manager.connectToTangle();
     const subscription: ISubscription = {
@@ -73,22 +106,16 @@ describe('Sending Request accept message', () => {
     const msg = await manager.sentRequestAcceptMsg(subscription);
     expect(msg).not.toBe('');
   });
-  it('should encrypt tag an message', async () => {
-    const manager = new SubscriptionManager(masterSecret);
-    const tag = 'FCWBFC9CYBPBYBYBPBVBZBPBCB9';
-    const secret = 'SomeSecret';
+});
+describe('Fetching subscription Request', () => {
+  it('should return several bundles', async () => {
+    const manager = new SubscriptionManager({
+      masterSecret,
+      keyPair: null,
+      seed,
+    });
     await manager.init();
-    await manager.connectToTangle();
-    const subscription: ISubscription = {
-      dataType: EDataTypes.heartRate,
-      endDate: new DateTag(2019, 9, 10),
-      id: 'ABC',
-      pubKey:
-        'AAAAAWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDDDKYVEVAEX',
-      startDate: new DateTag(2019, 7, 15),
-    };
-    const msg = await manager.sentRequestAcceptMsg(subscription);
-    const decTag = await manager.decrypt(msg[0].tag.replace(/9*$/g, ''));
-    expect(msg).toBe('');
+    const requestBundles = await manager.fetchSubscriptionRequests();
+    expect(requestBundles).toBe('');
   });
 });

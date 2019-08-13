@@ -11,6 +11,9 @@ import * as iotaJson from '@iota/extract-json';
 import { AES, SHA3 } from 'crypto-js';
 import DateTag from './DateTag';
 
+import * as ntru from '@decentralized-auth/ntru';
+import { createKeyPair, KeyPair } from '@decentralized-auth/ntru';
+import { Trytes } from '@iota/core/typings/types';
 import { hashFromBinStr } from './hashingTree';
 import { groupBy, uniqueBundelHashes } from './helpers';
 import { generateSeed, sentMsgToTangle } from './iotaUtils';
@@ -19,26 +22,38 @@ import { asciiToTrits } from './ternaryStringOperations';
 import { getNodesBetween } from './treeCalculation';
 import { IHashItem } from './typings/HashStore';
 import { IRequestMsg } from './typings/messages/WelcomeMsg';
-import * as ntru from '@decentralized-auth/ntru';
-import { KeyPair } from '@decentralized-auth/ntru';
 export default class SubscriptionManager {
   public iota: API;
-  public subscriptionRequestAddress =
-    'AAAAAWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDDDKYVEVAEX';
-  private keyPair: IKeyPair;
+  public subscriptionRequestAddress;
+  private keyPair: KeyPair;
   private seed: string;
   private masterSecret: string;
   private subscriptionsStore: SubscriptionStore;
   private rejectedRequests: Map<string, Transaction>;
   private requestStore: string[];
-  constructor(masterSecret: string, keyPair?: KeyPair, seed?: string) {
+  constructor({
+    masterSecret,
+    keyPair,
+    seed,
+    subscriptionRequestAddress,
+  }: {
+    masterSecret: string;
+    keyPair?: KeyPair;
+    seed?: string;
+    subscriptionRequestAddress?: string;
+  }) {
     this.masterSecret = masterSecret;
     if (keyPair) {
       this.keyPair = keyPair;
     }
     if (!seed) {
       this.seed = generateSeed();
+    } else {
+      this.seed = seed;
     }
+    this.subscriptionRequestAddress = subscriptionRequestAddress
+      ? subscriptionRequestAddress
+      : 'AAAAAWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDDDKYVEVAEX';
     this.subscriptionsStore = new SubscriptionStore([]);
   }
   /**
@@ -48,7 +63,10 @@ export default class SubscriptionManager {
     if (this.keyPair !== undefined) {
       throw Error('Keypair already set');
     }
-    this.keyPair = await ntru.createKeyPair(this.seed);
+    this.keyPair = await createKeyPair(this.seed);
+    this.iota = composeAPI({
+      provider: 'https://nodes.iota.cafe:443',
+    });
   }
 
   /**
@@ -56,7 +74,7 @@ export default class SubscriptionManager {
    */
   public connectToTangle() {
     this.iota = composeAPI({
-      provider: 'https://nodes.thetangle.org:443',
+      provider: 'https://nodes.iota.cafe:443',
     });
   }
   /**
@@ -104,51 +122,31 @@ export default class SubscriptionManager {
     }
   }
   /**
-   * name
-   */
-  public evaluateRequestMessages(bundles: string[]) {}
-  /**
    * sentRequestAcceptMsg
    */
   public async sentRequestAcceptMsg(sub: ISubscription) {
     const hashList = this.getNodeHashesForDaterange(sub.startDate, sub.endDate);
+    const hashListJson = JSON.stringify(hashList);
+
     // encrypt the symetric key of the data with the pubKey
-    // TODO make secret changeable
+    // FIXME make secret changeable
     const secret = 'SomeSecret';
-    const encSecret = ntru;
-    const secretTrits = asciiToTrits('SomeSecret');
-    const secretBytes = tritsToBytes(secretTrits);
-    const secretUint = Uint8Array.from(secretBytes);
-    const encTag = await ntru.encrypt(secretUint, this.keyPair.public);
-    const encdecTag = await ntru.decrypt(encTag, this.keyPair.private);
-    const decBuffer = Buffer.from(encdecTag);
-    const decTrits = bytesToTrits(decBuffer);
-    const compSecDec = secretTrits.toString() === decTrits.toString();
-    const decStr = trytesToAscii(tritsToTrytes(decTrits));
-    const comp = encdecTag.toString() === secretUint.toString();
-    // const encdecTagTryte = tritsToTrytes(encdecTagString);
-    const hashListEnc = AES.encrypt(
-      JSON.stringify(hashList),
-      encTag.toString()
-    );
-    const tagBuffer = Buffer.from(encTag.buffer);
     const address = sub.pubKey;
+    const hashListEnc = AES.encrypt(hashListJson, secret).toString();
+    const hashListTrytes = asciiToTrytes(hashListEnc);
+
+    // FIXME change to pubKey of subscription
+    const secretEnc: Trytes = ntru.encrypt(secret, this.getPubKey());
+    const msgTrytes = secretEnc + hashListTrytes;
+    const tag = `${secretEnc.length.toString()}-${hashListTrytes.length.toString()}`;
     const msg = await sentMsgToTangle(
       this.iota,
       this.seed,
       address,
-      hashListEnc.toString(),
-      tritsToTrytes(bytesToTrits(tagBuffer))
+      msgTrytes,
+      asciiToTrytes(tag)
     );
     return msg;
-  }
-  /**
-   * decrypt
-   */
-  public async decrypt(msg: string) {
-    const msgBuffer = tritsToBytes(trytesToTrits(msg));
-    const decMsg = await ntru.decrypt(msgBuffer, this.keyPair.private);
-    return decMsg;
   }
   private getNodeHashesForDaterange(s: DateTag, e: DateTag) {
     const dateRangePaths = getNodesBetween(s, e);

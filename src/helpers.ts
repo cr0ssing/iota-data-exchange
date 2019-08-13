@@ -8,7 +8,6 @@ import {
   valueToTrits,
 } from '@iota/converter';
 import { Tag, Transaction } from '@iota/core/typings/types';
-import { ntru } from 'ntru';
 import { StringDecoder } from 'string_decoder';
 import DateTag from './DateTag';
 import { hashCurl } from './hashingTree';
@@ -45,55 +44,4 @@ export function groupBy(list, keyGetter) {
     }
   });
   return map;
-}
-
-export async function encryptTag(
-  secret: string,
-  pubKey: Uint8Array,
-  privKey: Uint8Array
-): Promise<Tag> {
-  const secretTrits = asciiToTrits(secret);
-  const ntruMaxLenght = await ntru.plaintextBytes;
-  const secretHash = hashCurl(secretTrits, null, ntruMaxLenght);
-  const secretHashStr = tritsToTrytes(secretHash);
-  const secretBytes = tritsToBytes(secretHash);
-  const secretUint = Uint8Array.from(secretBytes);
-  const encTag = await ntru.encrypt(secretHashStr, pubKey);
-  const encTagStr = encTag.toString();
-  const encTagJsonString = JSON.stringify(encTag);
-  const encTagTrytes = asciiToTrytes(encTagStr);
-  let encTagStrArr = [];
-  encTag.forEach(element => {
-    encTagStrArr = [...encTagStrArr, valueToTrits(element)];
-  });
-  const tagBuffer = Buffer.from(encTag);
-  const utf8decoder = new StringDecoder('ascii');
-  const tagUft8 = utf8decoder.write(tagBuffer);
-  const tagUtf8Ternary = asciiToTrytes(tagUft8);
-  const tagEncTrits = bytesToTrits(tagBuffer);
-  const tagEncTrytes = tritsToTrytes(tagEncTrits);
-  const tagLength = tagEncTrytes.length;
-
-  // debug
-  const tagDecAscii = trytesToAscii(tagEncTrytes);
-  const compareEncDec = tagUft8 === tagDecAscii;
-  const tagReduced = tagEncTrytes.replace(/9*$/g, '') + '9';
-  const tagBytes = tritsToBytes(trytesToTrits(tagReduced));
-  const encdecTag = await ntru.decrypt(tagBytes, privKey);
-
-  return tagEncTrytes;
-}
-export async function decryptTag(
-  tag: Tag,
-  privKey: Uint8Array
-): Promise<string> {
-  const tagReduced = tag.replace(/9*$/g, '') + '9';
-  const tagBytes = tritsToBytes(trytesToTrits(tagReduced));
-  const encdecTag = await ntru.decrypt(tagBytes, privKey);
-  const decBuffer = Buffer.from(encdecTag);
-  const decTrits = bytesToTrits(decBuffer);
-  const decTrytes = tritsToTrytes(decTrits);
-  const decString = trytesToAscii(decTrytes);
-
-  return decString;
 }
