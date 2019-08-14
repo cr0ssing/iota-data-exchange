@@ -116,6 +116,6 @@ describe('Fetching subscription Request', () => {
     });
     await manager.init();
     const requestBundles = await manager.fetchSubscriptionRequests();
-    expect(requestBundles).toBe('');
+    expect(requestBundles).not.toBe('');
   });
 });

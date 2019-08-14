@@ -1,36 +1,29 @@
-import {
-  asciiToTrytes,
-  bytesToTrits,
-  tritsToBytes,
-  tritsToTrytes,
-  trytesToAscii,
-  trytesToTrits,
-} from '@iota/converter';
-import { API, Bundle, composeAPI, errors, Transaction } from '@iota/core';
-import * as iotaJson from '@iota/extract-json';
-import { AES, SHA3 } from 'crypto-js';
-import DateTag from './DateTag';
-
-import * as ntru from '@decentralized-auth/ntru';
 import { createKeyPair, KeyPair } from '@decentralized-auth/ntru';
+import * as ntru from '@decentralized-auth/ntru';
+import { asciiToTrytes } from '@iota/converter';
+import { API, Bundle, composeAPI, Transaction } from '@iota/core';
 import { Trytes } from '@iota/core/typings/types';
+import * as iotaJson from '@iota/extract-json';
+import { AES } from 'crypto-js';
+import DateTag from './DateTag';
 import { hashFromBinStr } from './hashingTree';
-import { groupBy, uniqueBundelHashes } from './helpers';
-import { generateSeed, sentMsgToTangle } from './iotaUtils';
+import { groupBy } from './helpers';
+import {
+  generateSeed,
+  parseWelcomeMessage,
+  sentMsgToTangle,
+} from './iotaUtils';
 import SubscriptionStore, { ISubscription } from './SubscriptionStore';
-import { asciiToTrits } from './ternaryStringOperations';
 import { getNodesBetween } from './treeCalculation';
 import { IHashItem } from './typings/HashStore';
 import { IRequestMsg } from './typings/messages/WelcomeMsg';
 export default class SubscriptionManager {
   public iota: API;
-  public subscriptionRequestAddress;
+  public subscriptionRequestAddress: string;
   private keyPair: KeyPair;
   private seed: string;
   private masterSecret: string;
-  private subscriptionsStore: SubscriptionStore;
-  private rejectedRequests: Map<string, Transaction>;
-  private requestStore: string[];
+  private requests: Map<string, Transaction[]>;
   constructor({
     masterSecret,
     keyPair,
@@ -54,7 +47,6 @@ export default class SubscriptionManager {
     this.subscriptionRequestAddress = subscriptionRequestAddress
       ? subscriptionRequestAddress
       : 'AAAAAWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDDDKYVEVAEX';
-    this.subscriptionsStore = new SubscriptionStore([]);
   }
   /**
    * init
@@ -92,7 +84,9 @@ export default class SubscriptionManager {
   /**
    * fetchSubscriptionRequests
    */
-  public async fetchSubscriptionRequests() {
+  public async fetchSubscriptionRequests(): Promise<
+    Map<string, Transaction[]>
+  > {
     const transactions: Transaction[] = await this.iota.findTransactionObjects({
       addresses: [this.subscriptionRequestAddress],
     });
@@ -102,24 +96,25 @@ export default class SubscriptionManager {
       zeroValTrans,
       t => t.bundle
     );
-
+    this.requests = groupedBundles;
     return groupedBundles;
+  }
+  /**
+   * getSubscriptionRequestAddress
+   */
+  public getSubscriptionRequestAddress(): string {
+    return this.subscriptionRequestAddress;
   }
   /**
    * decryptRequestBundels
    */
-  public decryptRequestBundel(bundle: Bundle): IRequestMsg | {} {
-    const trans = bundle
-      .map(e => e)
-      .sort((a, b) => a.currentIndex - b.currentIndex);
-    try {
-      const json = iotaJson.extractJson(trans);
-      const jsonObj = JSON.parse(json);
-      // TODO Add typecheck if it fits the message Type
-      return jsonObj;
-    } catch (error) {
-      return {};
+  public async decryptRequestBundel(): Promise<string[]> {
+    let res = [];
+    for (const v of this.requests.values()) {
+      const msg = await parseWelcomeMessage(v, this.keyPair.private);
+      res = [...res, msg];
     }
+    return res;
   }
   /**
    * sentRequestAcceptMsg
@@ -157,12 +152,5 @@ export default class SubscriptionManager {
       };
     });
     return hashList;
-  }
-  /**
-   * Update the transactions on the RequestAddress
-   * @param transList
-   */
-  private updateRequestTransactions(transList: string[]) {
-    this.requestStore = transList;
   }
 }

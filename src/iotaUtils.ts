@@ -1,10 +1,9 @@
-import { decrypt, PrivateKey } from '@decentralized-auth/ntru';
+import { decrypt, encrypt, PrivateKey } from '@decentralized-auth/ntru';
 import { asciiToTrytes, trytesToAscii } from '@iota/converter';
-import { Address, API, Transfer } from '@iota/core/typings/core/src';
+import { API, Transfer } from '@iota/core/typings/core/src';
 import { Trytes } from '@iota/core/typings/types';
 import { Bundle } from '@iota/http-client/typings/types';
 import { AES, enc } from 'crypto-js';
-import { ntruLenght } from './constants';
 
 export function generateSeed(length = 81) {
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9';
@@ -35,7 +34,7 @@ export async function sentMsgToTangle(
   ];
   try {
     const prepTransfersTrytes = await iota.prepareTransfers(seed, transfers);
-    const attachedBundle = await iota.sendTrytes(
+    const attachedBundle: Bundle = await iota.sendTrytes(
       prepTransfersTrytes,
       depth /*depth*/,
       mwm /*MWM*/
@@ -68,4 +67,21 @@ export async function parseWelcomeMessage(bundle: Bundle, key: PrivateKey) {
   const msgDecryptedBytes = await AES.decrypt(msgTrytesAscii, secret);
   const msgDecryptedString = msgDecryptedBytes.toString(enc.Utf8);
   return msgDecryptedString;
+}
+
+export function encryptMsg(msg: string, pubKey: Trytes, secret?: string) {
+  const encSecret = secret ? secret : generateSeed(100);
+  const payloadEnc = AES.encrypt(msg, encSecret).toString();
+  const payloadEncTrytes = asciiToTrytes(payloadEnc);
+
+  const secretEnc: Trytes = encrypt(encSecret, pubKey);
+  const msgTrytes = secretEnc + payloadEncTrytes;
+  const meta = asciiToTrytes(
+    `${secretEnc.length.toString()}-${payloadEncTrytes.length.toString()}`
+  );
+  return {
+    encSecret,
+    meta,
+    msgTrytes,
+  };
 }

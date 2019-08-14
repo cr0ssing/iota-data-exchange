@@ -10,7 +10,7 @@ const requestMsg: IRequestMsg = {
   dataType: EDataTypes.heartRate,
   endDate: dateEnd,
   nextAddress: 'ABS',
-  pubKey: 'PUB',
+  pubKeyAddress: 'PUB',
   startDate: dateStart,
 };
 

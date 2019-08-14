@@ -8,7 +8,7 @@ export interface IRequestMsg {
   startDate: DateTag;
   endDate: DateTag;
   dataType: EDataTypes;
-  pubKey: IPubKey;
+  pubKeyAddress: string;
   nextAddress: string;
 }
 
