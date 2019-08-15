@@ -3,6 +3,7 @@ import { createKeyPair, KeyPair, toTrytes } from '@decentralized-auth/ntru';
 import { tritsToTrytes, trytesToTrits } from '@iota/converter';
 import { Address, API, Bundle, composeAPI, Transaction } from '@iota/core/';
 import { generateKeyPair } from 'crypto';
+import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { hash, hashCurl } from './hashingTree';
 import { groupBy } from './helpers';
@@ -14,18 +15,18 @@ import {
 } from './typings/messages/WelcomeMsg';
 
 export default class {
-  private seed: string;
-  private keyPair: KeyPair;
-  private pubKeyAddress: string;
-  private requests: IRequestsState = {
+  public requests: IRequestsState = {
     active: [],
     closed: [],
     open: [],
   };
+  private seed: string;
+  private keyPair: KeyPair;
+  private pubKeyAddress: string;
   private iota: API;
   constructor({ seed }: { seed: string }) {
     this.iota = composeAPI({
-      provider: 'https://nodes.iota.cafe:443',
+      provider: defaultNodeAddress,
     });
     this.seed = seed ? seed : generateSeed();
   }

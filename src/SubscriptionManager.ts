@@ -5,6 +5,7 @@ import { API, Bundle, composeAPI, Transaction } from '@iota/core';
 import { Trytes } from '@iota/core/typings/types';
 import * as iotaJson from '@iota/extract-json';
 import { AES } from 'crypto-js';
+import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { hashFromBinStr } from './hashingTree';
 import { groupBy } from './helpers';
@@ -57,7 +58,7 @@ export default class SubscriptionManager {
     }
     this.keyPair = await createKeyPair(this.seed);
     this.iota = composeAPI({
-      provider: 'https://nodes.iota.cafe:443',
+      provider: defaultNodeAddress,
     });
   }
 
@@ -66,7 +67,7 @@ export default class SubscriptionManager {
    */
   public connectToTangle() {
     this.iota = composeAPI({
-      provider: 'https://nodes.iota.cafe:443',
+      provider: defaultNodeAddress,
     });
   }
   /**
@@ -129,7 +130,6 @@ export default class SubscriptionManager {
     const address = sub.pubKey;
     const hashListEnc = AES.encrypt(hashListJson, secret).toString();
     const hashListTrytes = asciiToTrytes(hashListEnc);
-
     // FIXME change to pubKey of subscription
     const secretEnc: Trytes = ntru.encrypt(secret, this.getPubKey());
     const msgTrytes = secretEnc + hashListTrytes;

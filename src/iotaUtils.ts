@@ -4,6 +4,8 @@ import { API, Transfer } from '@iota/core/typings/core/src';
 import { Trytes } from '@iota/core/typings/types';
 import { Bundle } from '@iota/http-client/typings/types';
 import { AES, enc } from 'crypto-js';
+import { toUnicode } from 'punycode';
+import { defaultDepth, defaultMwm } from './config';
 
 export function generateSeed(length = 81) {
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9';
@@ -21,8 +23,8 @@ export async function sentMsgToTangle(
   address: string,
   message: Trytes,
   tag: string,
-  depth: number = 3,
-  mwm: number = 14
+  depth: number = defaultDepth,
+  mwm: number = defaultMwm
 ): Promise<Bundle> {
   const transfers: Transfer[] = [
     {
@@ -53,8 +55,9 @@ export async function parseWelcomeMessage(bundle: Bundle, key: PrivateKey) {
   const tagString = trytesToAscii(tagTrytes)
     .split('-')
     .map(e => parseInt(e, 10));
-
-  const sigFrag = bundle
+  const temp = bundle.slice();
+  const sigFrag = temp
+    .sort((a, b) => a.currentIndex - b.currentIndex)
     .map(t => t.signatureMessageFragment)
     .reduce((a, b) => a + b);
   const secretTrytes = sigFrag.substring(0, tagString[0]);
@@ -84,4 +87,14 @@ export function encryptMsg(msg: string, pubKey: Trytes, secret?: string) {
     meta,
     msgTrytes,
   };
+}
+
+export async function getPubKeyFromTangle({
+  iota,
+  address,
+}: {
+  iota: API;
+  address: string;
+}) {
+  const trans = await iota.getBundle(address);
 }

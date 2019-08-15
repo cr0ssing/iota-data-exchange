@@ -31,10 +31,12 @@ describe('Data ower', () => {
     const accessRequest = await dataReciever.requestAccess(accesmsg);
     const dataOwnerRequests = await dataOwner.getAccessRequests();
     const res = dataOwnerRequests.values().next().value;
-    const a = accessRequest.map(e => e.hash);
-    const b = res.map(e => e.hash);
+    const a = accessRequest.map(e => e.hash).sort();
+    const b = res.map(e => e.hash).sort();
     expect(a).toStrictEqual(b);
     const decReq = await dataOwner.decryptRequests();
-    expect(decReq[0]).toBe(JSON.stringify(accesmsg));
+
+    const req = dataReciever.requests.open[0].msg;
+    expect(decReq[0]).toBe(JSON.stringify(req));
   });
 });
