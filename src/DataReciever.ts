@@ -7,7 +7,13 @@ import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { hash, hashCurl } from './hashingTree';
 import { groupBy } from './helpers';
-import { encryptMsg, generateSeed, sentMsgToTangle } from './iotaUtils';
+import {
+  encryptMsg,
+  generateSeed,
+  parseRequestMessage,
+  parseWelcomeMessage,
+  sentMsgToTangle,
+} from './iotaUtils';
 import {
   EDataTypes,
   IRequestMsg,
@@ -112,7 +118,7 @@ export default class {
       tangleAddress: trans[0].bundle,
     };
     this.addRequest(request);
-    return trans;
+    return request;
   }
   /**
    * checkOpenRequests
@@ -125,7 +131,12 @@ export default class {
     const requestResponses = await this.iota.findTransactionObjects({
       addresses: openRequestAddresses,
     });
-    const bundles = groupBy(requestResponses, e => e.bundle);
+    const res = await parseWelcomeMessage(
+      requestResponses,
+      this.keyPair.private
+    );
+    // const bundles = groupBy(requestResponses, e => e.bundle);
+    return res;
   }
   private addRequest(request: IDataRecieverRequest) {
     if (this.requests.open) {

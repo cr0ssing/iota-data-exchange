@@ -5,7 +5,7 @@ import { AES, enc } from 'crypto-js';
 import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { dateTagFromBinStr } from './helpers';
-import { parseWelcomeMessage } from './iotaUtils';
+import { parseRequestMessage } from './iotaUtils';
 import { EFillOptions } from './typings/Constants';
 const iota = composeAPI({
   provider: defaultNodeAddress,
@@ -22,20 +22,6 @@ describe('Datetag from binary string generation', () => {
     const resMax = dateTagFromBinStr(dateBinCheck, EFillOptions.MAX);
     expect(resMin).toStrictEqual(dateMin);
     expect(resMax).toStrictEqual(dateMax);
-  });
-});
-describe('Parsing a Welcome Message Bundle', () => {
-  it.skip('should reveal the original message', async () => {
-    const seed =
-      'HEEAXLXPIDUFFTLGNKQQYUNTRRCTYRSFOOFXGQRKNVEPGXWLURNXZPFCBVBCZRAKRMSXAGTNLTXMRPYDC';
-    const keyPair = await createKeyPair(seed);
-    const tryt = await iota.getBundle(
-      'LRKFQRWVLFMSRJNMUBDDMFPHOZJUOOXFMCZRXQLGMVRO9PCSMMDNDYFFACRURXRPRIWZPMUHCY9I99999'
-    );
-
-    const messagepayload = await parseWelcomeMessage(tryt, keyPair.private);
-    const messagepayloadJson = JSON.parse(messagepayload);
-    expect(messagepayloadJson.length).toStrictEqual(6);
   });
 });
 describe('AES Encryptin with trytes', () => {

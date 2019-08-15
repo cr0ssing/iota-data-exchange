@@ -38,10 +38,10 @@ export default class DataOwner {
     return this.subMan.fetchSubscriptionRequests();
   }
   /**
-   * decryptRequests
+   * acceptAccessRequest
    */
-  public async decryptRequests() {
-    return await this.subMan.decryptRequestBundel();
+  public async acceptAccessRequest(request: string) {
+    return this.subMan.acceptRequest(request);
   }
 }
 

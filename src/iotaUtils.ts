@@ -2,10 +2,12 @@ import { decrypt, encrypt, PrivateKey } from '@decentralized-auth/ntru';
 import { asciiToTrytes, trytesToAscii } from '@iota/converter';
 import { API, Transfer } from '@iota/core/typings/core/src';
 import { Trytes } from '@iota/core/typings/types';
-import { Bundle } from '@iota/http-client/typings/types';
+import { Bundle, Transaction } from '@iota/http-client/typings/types';
 import { AES, enc } from 'crypto-js';
 import { toUnicode } from 'punycode';
 import { defaultDepth, defaultMwm } from './config';
+import { IHashItem } from './typings/HashStore';
+import { IRequestMsg, IWelcomeMsg } from './typings/messages/WelcomeMsg';
 
 export function generateSeed(length = 81) {
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9';
@@ -50,16 +52,42 @@ export async function sentMsgToTangle(
  * Parse a bundle that is a WelcomeMessage
  * @param bundle
  */
-export async function parseWelcomeMessage(bundle: Bundle, key: PrivateKey) {
+export async function parseRequestMessage(
+  bundle: Bundle | Transaction[],
+  key: PrivateKey
+): Promise<IParsedRequestMessage> {
+  const obj = await decryptMsg(bundle, key);
+
+  return {
+    bundle: bundle[0].bundle,
+    msg: obj,
+  };
+}
+/**
+ * Parse a bundle that is a WelcomeMessage
+ * @param bundle
+ */
+export async function parseWelcomeMessage(
+  bundle: Bundle | Transaction[],
+  key: PrivateKey
+): Promise<IParsedWelcomeMessage> {
+  const obj = await decryptMsg(bundle, key);
+
+  return {
+    bundle: bundle[0].bundle,
+    msg: obj,
+  };
+}
+
+async function decryptMsg(
+  bundle: Bundle | Transaction[],
+  key: PrivateKey
+): Promise<any> {
   const tagTrytes = bundle[0].tag.replace(/9*$/, '');
   const tagString = trytesToAscii(tagTrytes)
     .split('-')
     .map(e => parseInt(e, 10));
-  const temp = bundle.slice();
-  const sigFrag = temp
-    .sort((a, b) => a.currentIndex - b.currentIndex)
-    .map(t => t.signatureMessageFragment)
-    .reduce((a, b) => a + b);
+  const sigFrag = extractSignatureFragments(bundle);
   const secretTrytes = sigFrag.substring(0, tagString[0]);
   const secret = await decrypt(secretTrytes, key);
   const msgTrytes = sigFrag.substring(
@@ -69,9 +97,9 @@ export async function parseWelcomeMessage(bundle: Bundle, key: PrivateKey) {
   const msgTrytesAscii = trytesToAscii(msgTrytes);
   const msgDecryptedBytes = await AES.decrypt(msgTrytesAscii, secret);
   const msgDecryptedString = msgDecryptedBytes.toString(enc.Utf8);
-  return msgDecryptedString;
+  const msgObj = JSON.parse(msgDecryptedString);
+  return msgObj;
 }
-
 export function encryptMsg(msg: string, pubKey: Trytes, secret?: string) {
   const encSecret = secret ? secret : generateSeed(100);
   const payloadEnc = AES.encrypt(msg, encSecret).toString();
@@ -96,5 +124,30 @@ export async function getPubKeyFromTangle({
   iota: API;
   address: string;
 }) {
-  const trans = await iota.getBundle(address);
+  if (address.length === 81) {
+    const trans: Transaction[] = await iota.findTransactionObjects({
+      bundles: [address],
+    });
+    return extractSignatureFragments(trans);
+  } else {
+    return address;
+  }
+}
+
+export interface IParsedRequestMessage {
+  msg: IRequestMsg;
+  bundle: string;
+}
+export interface IParsedWelcomeMessage {
+  msg: IHashItem[];
+  bundle: string;
+}
+
+export function extractSignatureFragments(bund: Bundle) {
+  const sigFrag = bund
+    .slice()
+    .sort((a, b) => a.currentIndex - b.currentIndex)
+    .map(t => t.signatureMessageFragment)
+    .reduce((a, b) => a + b);
+  return sigFrag;
 }

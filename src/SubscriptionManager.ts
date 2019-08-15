@@ -5,26 +5,30 @@ import { API, Bundle, composeAPI, Transaction } from '@iota/core';
 import { Trytes } from '@iota/core/typings/types';
 import * as iotaJson from '@iota/extract-json';
 import { AES } from 'crypto-js';
+import { type } from 'os';
 import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { hashFromBinStr } from './hashingTree';
 import { groupBy } from './helpers';
 import {
   generateSeed,
-  parseWelcomeMessage,
+  getPubKeyFromTangle,
+  IParsedRequestMessage,
+  parseRequestMessage,
   sentMsgToTangle,
 } from './iotaUtils';
 import SubscriptionStore, { ISubscription } from './SubscriptionStore';
 import { getNodesBetween } from './treeCalculation';
 import { IHashItem } from './typings/HashStore';
-import { IRequestMsg } from './typings/messages/WelcomeMsg';
+import { IRequestMsg, IWelcomeMsg } from './typings/messages/WelcomeMsg';
 export default class SubscriptionManager {
   public iota: API;
   public subscriptionRequestAddress: string;
   private keyPair: KeyPair;
   private seed: string;
   private masterSecret: string;
-  private requests: Map<string, Transaction[]>;
+  private requests: Map<string, IRequestMsg>;
+  private subscriptionStore: Map<string, ISubscription>;
   constructor({
     masterSecret,
     keyPair,
@@ -36,6 +40,8 @@ export default class SubscriptionManager {
     seed?: string;
     subscriptionRequestAddress?: string;
   }) {
+    this.subscriptionStore = new Map();
+    this.requests = new Map();
     this.masterSecret = masterSecret;
     if (keyPair) {
       this.keyPair = keyPair;
@@ -47,7 +53,7 @@ export default class SubscriptionManager {
     }
     this.subscriptionRequestAddress = subscriptionRequestAddress
       ? subscriptionRequestAddress
-      : 'AAAAAWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDDDKYVEVAEX';
+      : generateSeed();
   }
   /**
    * init
@@ -85,20 +91,19 @@ export default class SubscriptionManager {
   /**
    * fetchSubscriptionRequests
    */
-  public async fetchSubscriptionRequests(): Promise<
-    Map<string, Transaction[]>
-  > {
+  public async fetchSubscriptionRequests(): Promise<IParsedRequestMessage[]> {
     const transactions: Transaction[] = await this.iota.findTransactionObjects({
       addresses: [this.subscriptionRequestAddress],
     });
     // make sure only zero value transactions are pproccessed
     const zeroValTrans = transactions.filter(t => t.value === 0);
-    const groupedBundles: Map<string, Transaction[]> = groupBy(
+    const groupedBundles: TTransactionMap = groupBy(
       zeroValTrans,
       t => t.bundle
     );
-    this.requests = groupedBundles;
-    return groupedBundles;
+
+    const messages = await this.decryptRequestBundel(groupedBundles);
+    return messages;
   }
   /**
    * getSubscriptionRequestAddress
@@ -109,13 +114,18 @@ export default class SubscriptionManager {
   /**
    * decryptRequestBundels
    */
-  public async decryptRequestBundel(): Promise<string[]> {
-    let res = [];
-    for (const v of this.requests.values()) {
-      const msg = await parseWelcomeMessage(v, this.keyPair.private);
-      res = [...res, msg];
-    }
-    return res;
+  public async decryptRequestBundel(
+    bundle: TTransactionMap
+  ): Promise<IParsedRequestMessage[]> {
+    let promises: Array<Promise<IParsedRequestMessage>> = [];
+    bundle.forEach((v, k) => {
+      const prom = parseRequestMessage(v, this.keyPair.private);
+      promises = [...promises, prom];
+    });
+    const results = await Promise.all(promises);
+
+    results.forEach(v => this.requests.set(v.bundle, v.msg));
+    return results;
   }
   /**
    * sentRequestAcceptMsg
@@ -127,11 +137,14 @@ export default class SubscriptionManager {
     // encrypt the symetric key of the data with the pubKey
     // FIXME make secret changeable
     const secret = 'SomeSecret';
-    const address = sub.pubKey;
+    const address = sub.responseAddress;
     const hashListEnc = AES.encrypt(hashListJson, secret).toString();
     const hashListTrytes = asciiToTrytes(hashListEnc);
-    // FIXME change to pubKey of subscription
-    const secretEnc: Trytes = ntru.encrypt(secret, this.getPubKey());
+    const recieverPubKey = await getPubKeyFromTangle({
+      address: sub.pubKey,
+      iota: this.iota,
+    });
+    const secretEnc: Trytes = ntru.encrypt(secret, recieverPubKey);
     const msgTrytes = secretEnc + hashListTrytes;
     const tag = `${secretEnc.length.toString()}-${hashListTrytes.length.toString()}`;
     const msg = await sentMsgToTangle(
@@ -142,6 +155,29 @@ export default class SubscriptionManager {
       asciiToTrytes(tag)
     );
     return msg;
+  }
+  /**
+   * acceptRequest
+   */
+  public async acceptRequest(requestBundleHash: string) {
+    const {
+      dataType,
+      nextAddress,
+      endDate,
+      pubKeyAddress,
+      startDate,
+    } = this.requests.get(requestBundleHash);
+    const sub: ISubscription = {
+      dataType,
+      endDate,
+      pubKey: pubKeyAddress,
+      responseAddress: nextAddress,
+      startDate,
+    };
+    const acceptTrans = await this.sentRequestAcceptMsg(sub);
+
+    this.subscriptionStore.set(requestBundleHash, sub);
+    return sub;
   }
   private getNodeHashesForDaterange(s: DateTag, e: DateTag) {
     const dateRangePaths = getNodesBetween(s, e);
@@ -154,3 +190,5 @@ export default class SubscriptionManager {
     return hashList;
   }
 }
+
+type TTransactionMap = Map<string, Transaction[]>;

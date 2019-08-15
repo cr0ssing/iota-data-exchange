@@ -1,8 +1,8 @@
 import DataOwner from '../DataOwner';
 import DataReciever from '../DataReciever';
 import DateTag from '../DateTag';
-import { generateSeed } from '../iotaUtils';
-import { EDataTypes } from '../typings/messages/WelcomeMsg';
+import { generateSeed, parseRequestMessage } from '../iotaUtils';
+import { EDataTypes, IWelcomeMsg } from '../typings/messages/WelcomeMsg';
 jest.setTimeout(60000);
 
 describe('Data ower', () => {
@@ -22,21 +22,30 @@ describe('Data ower', () => {
     });
     await Promise.all([drInit, dataOwnerIinit]);
     const accesmsg = {
-      start: new DateTag(2019, 1, 5),
-      end: new DateTag(2019, 3, 10),
       dataType: EDataTypes.heartRate,
+      end: new DateTag(2019, 3, 10),
       peerAddress: dataOwner.getSubscriptionRequestAddress(),
       peerPubKey: dataOwner.getPubKey(),
+      start: new DateTag(2019, 1, 5),
     };
     const accessRequest = await dataReciever.requestAccess(accesmsg);
-    const dataOwnerRequests = await dataOwner.getAccessRequests();
-    const res = dataOwnerRequests.values().next().value;
-    const a = accessRequest.map(e => e.hash).sort();
-    const b = res.map(e => e.hash).sort();
-    expect(a).toStrictEqual(b);
-    const decReq = await dataOwner.decryptRequests();
+    const dataOwnerRequest = await dataOwner.getAccessRequests();
 
-    const req = dataReciever.requests.open[0].msg;
-    expect(decReq[0]).toBe(JSON.stringify(req));
+    expect(JSON.stringify(accessRequest.msg)).toBe(
+      JSON.stringify(dataOwnerRequest[0].msg)
+    );
+    const dataOwnerRequests = await dataOwner.getAccessRequests();
+    const subscription = await dataOwner.acceptAccessRequest(
+      dataOwnerRequests[0].bundle
+    );
+    expect(JSON.stringify(subscription.startDate)).toStrictEqual(
+      JSON.stringify(accesmsg.start)
+    );
+    expect(JSON.stringify(subscription.endDate)).toStrictEqual(
+      JSON.stringify(accesmsg.end)
+    );
+    const openReq = await dataReciever.checkOpenRequests();
+    expect(openReq.bundle).not.toBe(undefined);
+    expect(openReq.msg.length).toBe(8);
   });
 });

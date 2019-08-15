@@ -1,5 +1,6 @@
-import { KeyPair } from '@decentralized-auth/ntru';
+import { createKeyPair, KeyPair, toTrytes } from '@decentralized-auth/ntru';
 import DateTag from './DateTag';
+import { generateSeed } from './iotaUtils';
 import SubscriptionManager from './SubscriptionManager';
 import { ISubscription } from './SubscriptionStore';
 import { EDataTypes } from './typings/messages/WelcomeMsg';
@@ -96,13 +97,12 @@ describe('Sending Request accept message', () => {
       seed,
     });
     await manager.init();
-    await manager.connectToTangle();
+    const keyPair = createKeyPair(generateSeed());
     const subscription: ISubscription = {
       dataType: EDataTypes.heartRate,
       endDate: new DateTag(2019, 9, 10),
-      id: 'ABC',
-      pubKey:
-        'AAAAAWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDDDKYVEVAEX',
+      pubKey: toTrytes(keyPair.public),
+      responseAddress: generateSeed(),
       startDate: new DateTag(2019, 7, 15),
     };
     const msg = await manager.sentRequestAcceptMsg(subscription);
