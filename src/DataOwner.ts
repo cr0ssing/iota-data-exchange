@@ -1,8 +1,11 @@
+import { MamReader } from 'mam.ts/typings/src';
+import DataPublishConnector from './DataPublishConnector';
 import SubscriptionManager from './SubscriptionManager';
 
 export default class DataOwner {
   private subMan: SubscriptionManager;
   private seed: string;
+  private dataConnectors: Map<string, DataPublishConnector>;
   /**
    * init
    */
@@ -11,6 +14,7 @@ export default class DataOwner {
     seed,
     subscriptionRequestAddress,
   }: IInitDataOwner) {
+    this.dataConnectors = new Map();
     this.seed = seed;
     this.subMan = new SubscriptionManager({
       masterSecret,
@@ -18,6 +22,18 @@ export default class DataOwner {
       subscriptionRequestAddress,
     });
     const subManinit = await this.subMan.init();
+  }
+  /**
+   * addDataConnector
+   */
+  public addDataConnector({
+    conn,
+    id,
+  }: {
+    conn: DataPublishConnector;
+    id: string;
+  }) {
+    this.dataConnectors.set(id, conn);
   }
   /**
    * getSubscriptionRequestAddress

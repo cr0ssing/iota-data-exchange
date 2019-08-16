@@ -35,6 +35,7 @@
     "@iota/extract-json": "^1.0.0-beta.21",
     "@iota/kerl": "^1.0.0-beta.19",
     "crypto-js": "^3.1.9-1",
+    "mam.ts": "^0.1.6",
     "ntrujs": "^1.0.18",
     "one-time-pad": "^1.0.3",
     "util": "^0.12.1",

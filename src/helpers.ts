@@ -7,7 +7,7 @@ import {
   trytesToTrits,
   valueToTrits,
 } from '@iota/converter';
-import { Tag, Transaction } from '@iota/core/typings/types';
+import { Tag, Transaction, Trytes } from '@iota/core/typings/types';
 import { StringDecoder } from 'string_decoder';
 import DateTag from './DateTag';
 import { hashCurl } from './hashingTree';
@@ -44,4 +44,13 @@ export function groupBy(list, keyGetter) {
     }
   });
   return map;
+}
+
+export function tagTrytesToDateTag(trytes: Trytes) {
+  let stripedTrytes = trytes.replace(/9*$/, '');
+  if (stripedTrytes.length % 2) {
+    stripedTrytes = stripedTrytes + '9';
+  }
+  const tagPlain = trytesToAscii(stripedTrytes);
+  return tagPlain;
 }

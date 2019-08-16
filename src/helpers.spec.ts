@@ -4,7 +4,7 @@ import { composeAPI } from '@iota/core';
 import { AES, enc } from 'crypto-js';
 import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
-import { dateTagFromBinStr } from './helpers';
+import { dateTagFromBinStr, tagTrytesToDateTag } from './helpers';
 import { parseRequestMessage } from './iotaUtils';
 import { EFillOptions } from './typings/Constants';
 const iota = composeAPI({
@@ -48,5 +48,12 @@ describe('AES Encryptin with trytes', () => {
     expect(msgDecString).toBe(
       '[{"hash":"XZ9BIZNUEDVCIRSUQWNDTLTYUVNFPUOGAYPXP9EYFCBBCGYKKKGGLYIOGJZCKIIQFZEUJIZCFGJWQNTWF","prefix":"00011111100011011101111"},{"hash":"X9EBYBHOXFHRCWHBFTUPLJCSLIRKQIWLVIOQX9KCF9UBPMDTVXPVZIPYQLDDNGQNTQDTXHSPHBRHGZESH","prefix":"0001111110001101111XXXX"},{"hash":"NMIAAHOJSMNEBMAXTCQQ9FW9BTYRUVSKQLWFYFCWDDPFGDCHOSQRNWZOMWJFZYLDQGMQHQU9NTJTKTNTC","prefix":"00011111100011100100XXX"},{"hash":"SVBPVQ9UBNKBACBMJMAJNZXGGTK9WQAUYSMHNGPFXDQUPCAJUXHFOAGEWATDPWSEKJKUAPNGMVQXLITOH","prefix":"00011111100011100101010"},{"hash":"BBOAXQHXIARXKSILOOUIATOTJV9QOZGGDNZQZLDBCUXPMRERKMU9ZPIEFLCCENISCOOZXFONKTAE9TSZP","prefix":"0001111110001110010100X"},{"hash":"GBTNNACDMWGJFHSGWJQOBAPOUOUWAT9BVENRTSVYJSAX9VLLV9OJWNZYYKFOUGUFXZUGOBRYDDMHMLNAV","prefix":"000111111000111000"}]'
     );
+  });
+});
+describe('tag to Datetag convertions', () => {
+  it('should return a datetag', () => {
+    const tryt = 'WAUAVACBUABBVA9B99999999999';
+    const res = tagTrytesToDateTag(tryt);
+    expect(res).toBe('20190816');
   });
 });

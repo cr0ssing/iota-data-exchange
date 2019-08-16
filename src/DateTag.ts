@@ -1,3 +1,4 @@
+import { asciiToTrytes } from '@iota/converter';
 import { buildStrBin } from './binaryStringOperations';
 import { EDay, EMonth, EYear, IDateTag, IMonth, IYear } from './typings/Date';
 /**
@@ -40,10 +41,17 @@ export default class DateTag implements IDateTag {
    */
   public toString() {
     const year = this.year.toString();
-    const month = this.month.toString();
-    const day = this.day.toString();
+    const month =
+      this.month < 10 ? '0' + this.month.toString() : this.month.toString();
+    const day = this.day < 10 ? '0' + this.day.toString() : this.day.toString();
     // TODO Extend to support hours and minutes
     return year + month + day;
+  }
+  /**
+   * toTrytes
+   */
+  public toTrytes() {
+    return asciiToTrytes(this.toString());
   }
   /**
    * Get binary string of a date

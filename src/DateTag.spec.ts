@@ -91,3 +91,15 @@ describe('Function of Datetage', () => {
     expect(res).toBe(1);
   });
 });
+describe('ToString concertion', () => {
+  it('should return string with zeros if month/day is less than 10', () => {
+    const date = new DateTag(2019, 5, 5);
+    const dateStr = date.toString();
+    expect(dateStr).toBe('20190505');
+  });
+  it('should return string without zeros if month/day is greater than 10', () => {
+    const date = new DateTag(2019, 10, 15);
+    const dateStr = date.toString();
+    expect(dateStr).toBe('20191015');
+  });
+});
