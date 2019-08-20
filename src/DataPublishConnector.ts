@@ -3,6 +3,7 @@ import { Transaction } from '@iota/core/typings/types';
 import { MAM_MODE, MamReader } from 'mam.ts';
 import { type } from 'os';
 import { defaultNodeAddress } from './config';
+import { HashList } from './HashStore';
 import { tagTrytesToDateTag } from './helpers';
 import MamReaderExtended from './MamReaderExtendet';
 
@@ -27,7 +28,7 @@ export default class {
   /**
    * connect
    */
-  public async connect(nextRoot: string) {
+  public async connect(nextRoot: string, hashList: HashList) {
     // const t: Transaction[] = await this.iota.findTransactions({
     //   addresses: [nextRoot],
     // });
@@ -39,7 +40,7 @@ export default class {
       root: nextRoot,
       mode: MAM_MODE.RESTRICTED,
       sideKey: 'unsecure',
-      hashList: [],
+      hashList,
     });
   }
   /**

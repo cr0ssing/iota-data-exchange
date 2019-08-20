@@ -1,7 +1,9 @@
 import * as converter from '@iota/converter';
 import Curl from '@iota/curl';
 import DateTag from './DateTag';
+import { HashList } from './HashStore';
 import { asciiToTrits, binStrToTrits } from './ternaryStringOperations';
+import { fromYears } from './treeCalculation';
 
 /**
  * Hashes a value
@@ -74,4 +76,20 @@ export function hashFromBinStr(secret: string, binStr: string) {
   const binTrits = binStrToTrits(binStr.replace(/X/g, ''));
   const hashVal = hash(secretTrits, binTrits);
   return converter.trytes(hashVal);
+}
+
+export function hashListFromDatatags(
+  masterSecret: string,
+  start: DateTag,
+  end: DateTag
+) {
+  const dateRangePaths = fromYears(start, end);
+
+  const hashList: HashList = dateRangePaths.map(p => {
+    return {
+      hash: hashFromBinStr(masterSecret, p),
+      prefix: p,
+    };
+  });
+  return hashList;
 }

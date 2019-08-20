@@ -206,8 +206,8 @@ describe('Nodes from daterange', () => {
   it('specific daterange with two months', () => {
     const dateStart = new DateTag(2019, 3, 5);
     const dateEnd = new DateTag(2019, 4, 5);
-    const res = fromYears(dateStart, dateEnd);
-    expect(res.sort()).toStrictEqual(
+    const res = fromYears(dateStart, dateEnd).sort();
+    expect(res).toStrictEqual(
       [
         '00011111100011001100101', // 2019-03-05
         '0001111110001100110011X', // 2019-03-06 - 2019-03-07

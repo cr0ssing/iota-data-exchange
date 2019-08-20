@@ -4,6 +4,7 @@ import DataPublishConnector from '../../DataPublishConnector';
 import DataPublisher from '../../DataPublisher';
 import DataReciever from '../../DataReciever';
 import DateTag from '../../DateTag';
+import { hashListFromDatatags } from '../../hashingTree';
 import { generateSeed, parseRequestMessage } from '../../iotaUtils';
 import { EDataTypes, IWelcomeMsg } from '../../typings/messages/WelcomeMsg';
 jest.setTimeout(60000);
@@ -58,6 +59,11 @@ describe('Connection between data publisher and Dataower', () => {
     const masterSecret = 'SomeSecret';
     const seedDataOwn = generateSeed();
     const dataOwnsubscriptionRequestAddress = generateSeed();
+    const hashList = hashListFromDatatags(
+      masterSecret,
+      new DateTag(2019, 1, 1),
+      new DateTag(2019, 11, 1)
+    );
     const dataOwner = new DataOwner();
     const dataOwnerIinit = dataOwner.init({
       masterSecret,
@@ -84,8 +90,8 @@ describe('Connection between data publisher and Dataower', () => {
       conn: connector,
       id: 'Device1',
     });
-    await connector.connect(startRoot);
+    await connector.connect(startRoot, hashList);
     const firstmsg = await connector.getMsg();
-    expect(firstmsg).toBe('');
+    expect(firstmsg).toBe('HelloWorld');
   });
 });

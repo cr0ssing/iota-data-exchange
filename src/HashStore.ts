@@ -17,7 +17,9 @@ export default class HashStore {
   private maxDate: DateTag;
   constructor(hashList: IHashItem[]) {
     this.hashList = hashList;
-    this.setMinMaxRange();
+    if (this.hashList.length > 0) {
+      this.setMinMaxRange();
+    }
   }
   /**
    * addToHashList
@@ -48,6 +50,9 @@ export default class HashStore {
    * @param tag Datetag
    */
   public getHashPrefixFromDateTag(tag: DateTag): IHashItem {
+    if (!this.hashList) {
+      throw Error('Hashlist is empty');
+    }
     if (tag.compare(this.minDate) >= 0 && tag.compare(this.maxDate) <= 0) {
       const dateBin = tag.toBinStr();
       // find the longest common prefix

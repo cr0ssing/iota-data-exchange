@@ -190,25 +190,31 @@ export function fromMonths(s: DateTag | null, e: DateTag | null, p: string) {
       firstElem = [s, new DateTag(e.year, list[0], EDay.max)];
       lastElem = [new DateTag(e.year, list[list.length - 1], EDay.min), e];
     }
+    let res = [];
+    if (firstElem) {
+      const hashesStart = getNodesForHashing(
+        firstElem[0].month,
+        firstElem[1].month,
+        EMonth.max
+      );
+      const hashesStartSub = fromDays(
+        firstElem[0],
+        firstElem[1],
+        hashesStart[0]
+      );
+      res = [...res, ...hashesStartSub.map(el => p + el)];
+    }
+    if (lastElem) {
+      const hashesEnd = getNodesForHashing(
+        lastElem[0].month,
+        lastElem[1].month,
+        EMonth.max
+      );
+      const hashesEndSub = fromDays(lastElem[0], lastElem[1], hashesEnd[0]);
+      res = [...res, ...hashesEndSub.map(el => p + el)];
+    }
 
-    const hashesStart = getNodesForHashing(
-      firstElem[0].month,
-      firstElem[1].month,
-      EMonth.max
-    );
-
-    const hashesEnd = getNodesForHashing(
-      lastElem[0].month,
-      lastElem[1].month,
-      EMonth.max
-    );
-    const hashesStartSub = fromDays(firstElem[0], firstElem[1], hashesStart[0]);
-    const hashesEndSub = fromDays(lastElem[0], lastElem[1], hashesEnd[0]);
-
-    return [
-      ...hashesStartSub.map(el => p + el),
-      ...hashesEndSub.map(el => p + el),
-    ];
+    return res;
   } else if (list.length > 2) {
     // Case 1 - until end of year
     if (s !== null && e === null) {

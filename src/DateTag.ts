@@ -29,12 +29,12 @@ export default class DateTag implements IDateTag {
     minute?: number,
     second?: number
   ) {
-    (this.year = year),
-      (this.month = month),
-      (this.day = day),
-      (this.hour = hour ? hour : null),
-      (this.minute = minute ? minute : null),
-      (this.second = second ? second : null);
+    this.year = year;
+    this.month = month;
+    this.day = day;
+    this.hour = hour ? hour : null;
+    this.minute = minute ? minute : null;
+    this.second = second ? second : null;
   }
   /**
    * toString

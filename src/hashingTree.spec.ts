@@ -86,6 +86,6 @@ describe('Hash from datetag', () => {
     const partResTrit = converter.trits(partRes);
     const endHash = converter.trytes(hash(partResTrit, binStrToTrits('1')));
     const hasofEnd = hashFromDatetag(secret, dateEnd);
-    expect(endHash).toBe(hasofEnd);
+    expect(endHash).toStrictEqual(hasofEnd);
   });
 });
