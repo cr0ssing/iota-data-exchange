@@ -1,5 +1,6 @@
 import * as converter from '@iota/converter';
 import { EMSGSIZE } from 'constants';
+import { type } from 'os';
 import DateTag from './DateTag';
 import DateTagOutOfRange from './errors/DateTagOutOfRange';
 import NoHashPrefixFound from './errors/NoHashPrefixFound';
@@ -17,6 +18,12 @@ export default class HashStore {
   constructor(hashList: IHashItem[]) {
     this.hashList = hashList;
     this.setMinMaxRange();
+  }
+  /**
+   * addToHashList
+   */
+  public addToHashList(list: HashList) {
+    this.hashList = [...this.hashList, ...list];
   }
   /**
    * getHashList
@@ -91,3 +98,4 @@ export default class HashStore {
     );
   }
 }
+export type HashList = IHashItem[];

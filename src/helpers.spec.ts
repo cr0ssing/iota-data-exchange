@@ -4,7 +4,11 @@ import { composeAPI } from '@iota/core';
 import { AES, enc } from 'crypto-js';
 import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
-import { dateTagFromBinStr, tagTrytesToDateTag } from './helpers';
+import {
+  dateTagFromBinStr,
+  dateTagFromTxTag,
+  tagTrytesToDateTag,
+} from './helpers';
 import { parseRequestMessage } from './iotaUtils';
 import { EFillOptions } from './typings/Constants';
 const iota = composeAPI({
@@ -55,5 +59,10 @@ describe('tag to Datetag convertions', () => {
     const tryt = 'WAUAVACBUABBVA9B99999999999';
     const res = tagTrytesToDateTag(tryt);
     expect(res).toBe('20190816');
+  });
+  it('should return a Datetag object', () => {
+    const tryt = 'WAUAVACBUABBVA9B99999999999';
+    const date = dateTagFromTxTag(tryt);
+    expect(date.toString()).toBe('20190816');
   });
 });

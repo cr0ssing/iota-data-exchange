@@ -6,14 +6,17 @@ import { generateKeyPair } from 'crypto';
 import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { hash, hashCurl } from './hashingTree';
+import HashStore from './HashStore';
 import { groupBy } from './helpers';
 import {
   encryptMsg,
   generateSeed,
+  IParsedWelcomeMessage,
   parseRequestMessage,
   parseWelcomeMessage,
   sentMsgToTangle,
 } from './iotaUtils';
+import MamReaderExtended from './MamReaderExtendet';
 import {
   EDataTypes,
   IRequestMsg,
@@ -30,6 +33,8 @@ export default class {
   private keyPair: KeyPair;
   private pubKeyAddress: string;
   private iota: API;
+  private dataReader: MamReaderExtended;
+  private hashStore: HashStore;
   constructor({ seed }: { seed: string }) {
     this.iota = composeAPI({
       provider: defaultNodeAddress,
@@ -42,6 +47,7 @@ export default class {
   public async init() {
     this.keyPair = await createKeyPair(this.seed);
     this.pubKeyAddress = await this.publishPubKey();
+    this.hashStore = new HashStore([]);
   }
   /**
    * publishPubKey
@@ -137,6 +143,12 @@ export default class {
     );
     // const bundles = groupBy(requestResponses, e => e.bundle);
     return res;
+  }
+  /**
+   * saveWelcomeMessages
+   */
+  public saveWelcomeMessage(msg: IParsedWelcomeMessage) {
+    this.hashStore.addToHashList(msg.msg);
   }
   private addRequest(request: IDataRecieverRequest) {
     if (this.requests.open) {

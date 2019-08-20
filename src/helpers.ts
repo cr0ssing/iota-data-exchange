@@ -54,3 +54,13 @@ export function tagTrytesToDateTag(trytes: Trytes) {
   const tagPlain = trytesToAscii(stripedTrytes);
   return tagPlain;
 }
+
+export function dateTagFromTxTag(trytes: Trytes) {
+  const tagString = tagTrytesToDateTag(trytes);
+  const date = new DateTag(
+    parseInt(tagString.substr(0, 4), 10),
+    parseInt(tagString.substr(4, 2), 10),
+    parseInt(tagString.substr(6, 2), 10)
+  );
+  return date;
+}

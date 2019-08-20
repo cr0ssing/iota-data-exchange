@@ -3,3 +3,5 @@ export const defaultNodeAddress = 'http://localhost:14265';
 // export const defaultMwm = 9;
 export const defaultMwm = 1;
 export const defaultDepth = 3;
+export const defaultSeed =
+  'HEEAXLXPIDUFFTLGNKQQYUNTRRCTYRSFOOFXGQRKNVEPGXWLURNXZPFCBVBCZRAKRMSXAGTNLTXMRPYDC';

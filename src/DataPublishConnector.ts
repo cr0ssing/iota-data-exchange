@@ -4,9 +4,10 @@ import { MAM_MODE, MamReader } from 'mam.ts';
 import { type } from 'os';
 import { defaultNodeAddress } from './config';
 import { tagTrytesToDateTag } from './helpers';
+import MamReaderExtended from './MamReaderExtendet';
 
 export default class {
-  private dataReader: MamReader;
+  private dataReader: MamReaderExtended;
   private iota: API;
   private masterSecret: string;
   private streamMessages: Map<string, Transaction[]>;
@@ -33,18 +34,19 @@ export default class {
     // const tagTrytes = t[0].tag;
     // const tagPlain = tagTrytesToDateTag(tagTrytes);
 
-    this.dataReader = new MamReader(
-      defaultNodeAddress,
-      nextRoot,
-      MAM_MODE.RESTRICTED,
-      'unsecure'
-    );
+    this.dataReader = new MamReaderExtended({
+      provider: defaultNodeAddress,
+      root: nextRoot,
+      mode: MAM_MODE.RESTRICTED,
+      sideKey: 'unsecure',
+      hashList: [],
+    });
   }
   /**
    * getMsg
    */
   public async getMsg() {
-    return await this.dataReader.fetchSingle();
+    return await this.dataReader.getMessage();
   }
 }
 type TStreamMessages = Map<string, Transaction[]>;

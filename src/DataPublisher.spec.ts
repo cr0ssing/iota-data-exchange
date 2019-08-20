@@ -26,6 +26,6 @@ describe('Publish message', () => {
       date.getDate()
     );
     const res = await dataPublisher.sentMessage('HelloWorld');
-    expect(res).toBe('');
+    expect(res.length > 0).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 import { API, composeAPI } from '@iota/core';
 import { MAM_MODE, MAM_SECURITY, MamReader, MamWriter } from 'mam.ts';
-import { defaultNodeAddress } from './config';
+import { defaultDepth, defaultMwm, defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { hashFromDatetag } from './hashingTree';
 import { generateSeed } from './iotaUtils';
@@ -74,7 +74,17 @@ export default class {
     this.writer.setTag(tag);
     const sideKey = hashFromDatetag(this.masterSecret, dateTag);
     this.writer.changeMode(this.mamMode, sideKey);
-    const attachedMsg = await this.writer.createAndAttach(msg);
+    const mamMsg: {
+      payload: string;
+      root: string;
+      address: string;
+    } = await this.writer.create(msg);
+    const attachedMsg = await this.writer.attach(
+      mamMsg.payload,
+      mamMsg.address,
+      defaultDepth,
+      defaultMwm
+    );
     return attachedMsg;
   }
 }
