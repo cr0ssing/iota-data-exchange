@@ -9,8 +9,9 @@
  *
  * @module ntru
  */
-import { TextEncoder } from 'util';
-const NTRU = require('ntru');
+import { ntru } from 'ntru';
+import { TextDecoder, TextEncoder } from 'util';
+// const NTRU = require('ntru');
 const IOTA = require('iota.lib.js');
 
 const iota = new IOTA(); // IOTA lib instance without provider for utils only
@@ -43,9 +44,9 @@ function toBytes(str) {
  * @param {string} seed IOTA seed to generate key pair with
  * @returns {Object} Key pair with private and public keys
  */
-function createKeyPair(seed) {
+export function createKeyPair(seed) {
   const bytes = toBytes(seed);
-  const keyPair = NTRU.createKeyWithSeed(bytes);
+  const keyPair = ntru.keyPair(); // createKeyWithSeed(bytes);
 
   return keyPair;
 }
@@ -58,12 +59,24 @@ function createKeyPair(seed) {
  * @param {Buffer} buffer Buffer to convert
  * @returns {string} Tryte representation of buffer
  */
-function toTrytes(buffer) {
+export function toTrytes(buffer) {
   const trytes = iotaToTrytes(buffer.toString('base64'));
 
   return trytes;
 }
+export function toStringTrytes(arr: Uint8Array | Buffer) {
+  const decoder = new TextDecoder('utf-8');
+  const ba64 = decoder.decode(arr);
+  let tmp;
+  let rev;
 
+  tmp = new TextDecoder('utf-8').decode(arr); // to UTF-8 text.
+  tmp = unescape(encodeURIComponent(tmp)); // to binary-string.
+  tmp = btoa(tmp);
+  rev = new TextEncoder().encode(tmp); // to Uint8Array.
+  rev = rev.buffer; // to ArrayBuffer.
+  return ba64;
+}
 /**
  * Converts a buffer that was converted to trytes by {@link toTrytes}
  * back to a buffer.
@@ -73,7 +86,7 @@ function toTrytes(buffer) {
  * @param {string} trytes Buffer converted to trytes
  * @returns {Buffer} Original buffer
  */
-function fromTrytes(trytes) {
+export function fromTrytes(trytes) {
   const buffer = Buffer.from(iotaFromTrytes(trytes), 'base64');
 
   return buffer;
@@ -87,9 +100,9 @@ function fromTrytes(trytes) {
  * @param {Buffer} privateKey Private key
  * @returns {string} Plain text string
  */
-function decrypt(trytes, privateKey) {
+export async function decrypt(trytes, privateKey) {
   const buffer = fromTrytes(trytes);
-  const decrypted = NTRU.decrypt(buffer, privateKey);
+  const decrypted = await ntru.decrypt(buffer, privateKey);
 
   return decrypted.toString();
 }
@@ -102,7 +115,7 @@ function decrypt(trytes, privateKey) {
  * @param {string} publicKey Tryte encoded public key
  * @returns {string} Tryte encoded NTRU encrypted MAM data
  */
-function encrypt(str, publicKey) {
+export async function encrypt(str, publicKey) {
   if (str.length > 106) {
     throw new Error(
       `Cannot encrypt string ${str} because it is longer than 106 characters`
@@ -111,7 +124,7 @@ function encrypt(str, publicKey) {
 
   const publicKeyBuffer = fromTrytes(publicKey);
   const plainText = Buffer.from(str, 'utf8');
-  const encrypted = NTRU.encrypt(plainText, publicKeyBuffer);
+  const encrypted = await ntru.encrypt(plainText, publicKeyBuffer);
   const encryptedTrytes = toTrytes(encrypted);
 
   return encryptedTrytes;
@@ -121,13 +134,13 @@ function encrypt(str, publicKey) {
 // decrypting, otherwise it does not work. See
 // https://github.com/IDWMaster/ntrujs/issues/6.
 
-NTRU.createKey();
+// ntru.createKey();
 
-module.exports = {
-  toBytes,
-  createKeyPair,
-  toTrytes,
-  fromTrytes,
-  encrypt,
-  decrypt,
-};
+// exports = {
+//   toBytes,
+//   createKeyPair,
+//   toTrytes,
+//   fromTrytes,
+//   encrypt,
+//   decrypt,
+// };

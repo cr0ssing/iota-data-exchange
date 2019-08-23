@@ -12,8 +12,8 @@ import { StringDecoder } from 'string_decoder';
 import DateTag from './DateTag';
 import { hashCurl } from './hashingTree';
 import { asciiToTrits } from './ternaryStringOperations';
-import { EFillOptions } from './typings/Constants';
-import { EDay, EMonth, EYear } from './typings/Date';
+import { EFillOptions } from '../typings/Constants';
+import { EDay, EMonth, EYear } from '../typings/Date';
 
 export function dateTagFromBinStr(binStr: string, fill: EFillOptions) {
   const binStrRepl = binStr.replace('X', fill);

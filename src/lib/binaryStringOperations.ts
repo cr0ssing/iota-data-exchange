@@ -1,5 +1,5 @@
 import DateTag from './DateTag';
-import { EMonth } from './typings/Date';
+import { EMonth } from '../typings/Date';
 
 /**
  * Extends a binary string to a given length

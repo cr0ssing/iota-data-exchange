@@ -10,7 +10,7 @@ import {
   tagTrytesToDateTag,
 } from './helpers';
 import { parseRequestMessage } from './iotaUtils';
-import { EFillOptions } from './typings/Constants';
+import { EFillOptions } from '../typings/Constants';
 const iota = composeAPI({
   provider: defaultNodeAddress,
 });

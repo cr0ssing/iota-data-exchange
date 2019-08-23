@@ -1,5 +1,5 @@
 import DateTag from './DateTag';
-import { EDataTypes } from './typings/messages/WelcomeMsg';
+import { EDataTypes } from '../typings/messages/WelcomeMsg';
 
 export default class SubscriptionStore {
   private subs: ISubscription[];

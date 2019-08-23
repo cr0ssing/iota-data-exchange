@@ -2,7 +2,7 @@ import { MamReader } from 'mam.ts/typings/src';
 import DataPublishConnector from './DataPublishConnector';
 import SubscriptionManager from './SubscriptionManager';
 
-export default class DataOwner {
+export class DataOwner {
   private subMan: SubscriptionManager;
   private seed: string;
   private dataConnectors: Map<string, DataPublishConnector>;
@@ -64,5 +64,5 @@ export default class DataOwner {
 interface IInitDataOwner {
   seed: string;
   masterSecret: string;
-  subscriptionRequestAddress: string;
+  subscriptionRequestAddress?: string;
 }

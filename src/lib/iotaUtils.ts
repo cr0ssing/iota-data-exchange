@@ -6,8 +6,9 @@ import { Bundle, Transaction } from '@iota/http-client/typings/types';
 import { AES, enc } from 'crypto-js';
 import { toUnicode } from 'punycode';
 import { defaultDepth, defaultMwm } from './config';
-import { IHashItem } from './typings/HashStore';
-import { IRequestMsg, IWelcomeMsg } from './typings/messages/WelcomeMsg';
+import DateTag from './DateTag';
+import { IHashItem } from '../typings/HashStore';
+import { IRequestMsg, IWelcomeMsg } from '../typings/messages/WelcomeMsg';
 
 export function generateSeed(length = 81) {
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9';
@@ -56,8 +57,9 @@ export async function parseRequestMessage(
   bundle: Bundle | Transaction[],
   key: PrivateKey
 ): Promise<IParsedRequestMessage> {
-  const obj = await decryptMsg(bundle, key);
-
+  const obj: IRequestMsg = await decryptMsg(bundle, key);
+  Object.setPrototypeOf(obj.startDate, DateTag.prototype);
+  Object.setPrototypeOf(obj.endDate, DateTag.prototype);
   return {
     bundle: bundle[0].bundle,
     msg: obj,

@@ -1,4 +1,4 @@
-import DateTag from '../../DateTag';
+import DateTag from '../../lib/DateTag';
 import { IHashItem } from '../HashStore';
 
 export interface IWelcomeMsg {

@@ -1,11 +1,11 @@
 import { MAM_SECURITY } from 'mam.ts';
-import DataOwner from '../../DataOwner';
-import DataPublishConnector from '../../DataPublishConnector';
-import DataPublisher from '../../DataPublisher';
-import DataReciever from '../../DataReciever';
-import DateTag from '../../DateTag';
-import { hashListFromDatatags } from '../../hashingTree';
-import { generateSeed, parseRequestMessage } from '../../iotaUtils';
+import { DataOwner } from '../../lib/DataOwner';
+import DataPublishConnector from '../../lib/DataPublishConnector';
+import { DataPublisher } from '../../lib/DataPublisher';
+import { DataReciever } from '../../lib/DataReciever';
+import DateTag from '../../lib/DateTag';
+import { hashListFromDatatags } from '../../lib/hashingTree';
+import { generateSeed, parseRequestMessage } from '../../lib/iotaUtils';
 import { EDataTypes, IWelcomeMsg } from '../../typings/messages/WelcomeMsg';
 jest.setTimeout(60000);
 

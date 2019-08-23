@@ -1,7 +1,7 @@
 import { getMax, getMin, getMinMaxRange } from './binaryMinMax';
 import { appendStrVals, buildStrBin, getDiff } from './binaryStringOperations';
 import DateTag from './DateTag';
-import { EDateTagProps, EDay, EMonth, EYear } from './typings/Date';
+import { EDateTagProps, EDay, EMonth, EYear } from '../typings/Date';
 
 /**
  * Calculates all the intermediary nodes between given string and root

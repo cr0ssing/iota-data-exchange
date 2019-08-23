@@ -2,7 +2,7 @@ import DateTag from './DateTag';
 import { hashFromBinStr, hashFromDatetag } from './hashingTree';
 import HashStore from './HashStore';
 import { fromYears } from './treeCalculation';
-import { IHashItem } from './typings/HashStore';
+import { IHashItem } from '../typings/HashStore';
 
 describe('HashStore constructor', () => {
   it('should create a Instance', () => {

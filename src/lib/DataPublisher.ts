@@ -1,12 +1,15 @@
+import { asciiToTrytes } from '@iota/converter';
 import { API, composeAPI } from '@iota/core';
-import { MAM_MODE, MAM_SECURITY, MamReader, MamWriter } from 'mam.ts';
+import { MAM_MODE, MAM_SECURITY, MamReader } from 'mam.ts';
+import { Mam } from 'mam.ts/out/src';
+import { MamWriter } from '../mam/src';
 import { defaultDepth, defaultMwm, defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { hashFromDatetag } from './hashingTree';
 import { generateSeed } from './iotaUtils';
 import { getNodesBetween } from './treeCalculation';
 
-export default class {
+export class DataPublisher {
   private initialized: boolean;
   private iota: API;
   private seed: string;
@@ -17,20 +20,23 @@ export default class {
   private securitsLevel: MAM_SECURITY;
   private writer: MamWriter;
   private currentRoot: string;
+  private runInterval;
+  private messages: string[] = [];
+  private state: boolean = false;
   constructor() {}
   /**
    * init
    */
   public async init({
-    initialSideKey = 'unsecure',
     masterSecret,
-    securityLevel = MAM_SECURITY.LEVEL_1,
     seed,
+    securityLevel = MAM_SECURITY.LEVEL_1,
+    initialSideKey = 'unsecure',
   }: {
-    initialSideKey: string;
     masterSecret: string;
-    securityLevel: MAM_SECURITY;
     seed: string;
+    securityLevel?: MAM_SECURITY;
+    initialSideKey?: string;
   }) {
     this.iota = composeAPI({
       provider: defaultNodeAddress,
@@ -47,15 +53,51 @@ export default class {
       initialSideKey,
       this.securitsLevel
     );
+    // Object.assign(this.writer.changeMode, modifiedChangeMode);
     this.currentRoot = this.writer.getNextRoot();
     await this.writer.catchUpThroughNetwork();
     this.initialized = true;
+  }
+  /**
+   * isRunning
+   */
+  public isRunning() {
+    const state = this.runInterval ? true : false;
+    this.state = state;
+    return state;
   }
   /**
    * getNextRoot
    */
   public getNextRoot() {
     return this.writer.getNextRoot();
+  }
+  /**
+   * run
+   */
+  public run(interval: number) {
+    this.runInterval = setInterval(async () => {
+      const txs = await this.sentMessage(new Date().toTimeString());
+      this.messages.push(txs[0].address);
+      console.log(`Message published at ${txs[0].address} from ${this.seed}`);
+    }, interval);
+    this.state = true;
+    return this.runInterval;
+  }
+  public getMessageAddresses() {
+    return this.messages;
+  }
+  /**
+   * stop
+   */
+  public stop() {
+    try {
+      clearInterval(this.runInterval);
+      this.state = false;
+      return true;
+    } catch (error) {
+      return error;
+    }
   }
   /**
    * sentMessage

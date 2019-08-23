@@ -3,7 +3,7 @@ import DateTag from './DateTag';
 import { generateSeed } from './iotaUtils';
 import SubscriptionManager from './SubscriptionManager';
 import { ISubscription } from './SubscriptionStore';
-import { EDataTypes } from './typings/messages/WelcomeMsg';
+import { EDataTypes } from '../typings/messages/WelcomeMsg';
 const seed =
   'HEEAXLXPIDUFFTLGNKQQYUNTRRCTYRSFOOFXGQRKNVEPGXWLURNXZPFCBVBCZRAKRMSXAGTNLTXMRPYDC';
 

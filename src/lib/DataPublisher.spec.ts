@@ -1,5 +1,4 @@
-import { MamReader } from 'mam.ts/typings/src';
-import DataPublisher from './DataPublisher';
+import { DataPublisher } from './DataPublisher';
 import DateTag from './DateTag';
 const masterSecret = 'SomeSecret';
 const seed =
@@ -27,6 +26,8 @@ describe('Publish message', () => {
       date.getDate()
     );
     const res = await dataPublisher.sentMessage('HelloWorld');
+    const res2 = await dataPublisher.sentMessage('HelloWorld');
     expect(res.length > 0).toBe(true);
+    expect(res[0].address).not.toBe(res2[0].address);
   });
 });

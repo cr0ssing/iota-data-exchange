@@ -21,9 +21,9 @@ import {
   EDataTypes,
   IRequestMsg,
   IWelcomeMsg,
-} from './typings/messages/WelcomeMsg';
+} from '../typings/messages/WelcomeMsg';
 
-export default class {
+export class DataReciever {
   public requests: IRequestsState = {
     active: [],
     closed: [],

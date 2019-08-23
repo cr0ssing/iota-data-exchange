@@ -12,7 +12,7 @@ import { Decode } from 'mam.ts/src/Decode';
 import { defaultNodeAddress } from './config';
 import HashStore, { HashList } from './HashStore';
 import { dateTagFromTxTag, tagTrytesToDateTag } from './helpers';
-import { IHashItem } from './typings/HashStore';
+import { IHashItem } from '../typings/HashStore';
 
 export default class MamReaderExtended {
   protected providerConf: Provider;

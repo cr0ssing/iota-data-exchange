@@ -1,11 +1,25 @@
 import { asciiToTrytes } from '@iota/converter';
+import { EDay, EMonth, EYear, IDateTag, IMonth, IYear } from '../typings/Date';
 import { buildStrBin } from './binaryStringOperations';
-import { EDay, EMonth, EYear, IDateTag, IMonth, IYear } from './typings/Date';
 /**
  * Date tag
  * @author Raphael Manke
  */
 export default class DateTag implements IDateTag {
+  public static fromString(str: string) {
+    if (str.length >= 8) {
+      const year = parseInt(str.substring(0, 4), 10);
+      const month = parseInt(str.substring(5, 6), 10);
+      const day = parseInt(str.substring(7, 8), 10);
+      const hour =
+        str.length >= 10 ? parseInt(str.substring(9, 10), 10) : undefined;
+      const minute =
+        str.length >= 12 ? parseInt(str.substring(11, 12), 10) : undefined;
+      return new DateTag(year, month, day, hour, minute);
+    } else {
+      throw Error(`${str.length} is an invalid string size`);
+    }
+  }
   public year: number;
   public month: number;
   public day: number;

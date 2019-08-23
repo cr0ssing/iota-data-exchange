@@ -1,6 +1,6 @@
 import { createKeyPair, KeyPair } from '@decentralized-auth/ntru';
 import * as ntru from '@decentralized-auth/ntru';
-import { asciiToTrytes } from '@iota/converter';
+import { asciiToTrytes, trits, trytes } from '@iota/converter';
 import { API, Bundle, composeAPI, Transaction } from '@iota/core';
 import { Trytes } from '@iota/core/typings/types';
 import * as iotaJson from '@iota/extract-json';
@@ -8,7 +8,7 @@ import { AES } from 'crypto-js';
 import { type } from 'os';
 import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
-import { hashFromBinStr } from './hashingTree';
+import { hashCurl, hashFromBinStr } from './hashingTree';
 import { groupBy } from './helpers';
 import {
   generateSeed,
@@ -19,8 +19,8 @@ import {
 } from './iotaUtils';
 import SubscriptionStore, { ISubscription } from './SubscriptionStore';
 import { getNodesBetween } from './treeCalculation';
-import { IHashItem } from './typings/HashStore';
-import { IRequestMsg, IWelcomeMsg } from './typings/messages/WelcomeMsg';
+import { IHashItem } from '../typings/HashStore';
+import { IRequestMsg, IWelcomeMsg } from '../typings/messages/WelcomeMsg';
 export default class SubscriptionManager {
   public iota: API;
   public subscriptionRequestAddress: string;
@@ -53,7 +53,7 @@ export default class SubscriptionManager {
     }
     this.subscriptionRequestAddress = subscriptionRequestAddress
       ? subscriptionRequestAddress
-      : generateSeed();
+      : trytes(hashCurl(trits(this.seed), trits('REQUESTADDRESS')));
   }
   /**
    * init

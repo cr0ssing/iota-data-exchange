@@ -7,6 +7,14 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Launch via NPM",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run-script", "debug"],
+      "port": 9229
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Jest All",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
       "args": ["--runInBand"],
@@ -57,9 +65,26 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Linux",
-      "program": "${workspaceFolder}/src/index.ts",
+      "program": "${workspaceFolder}/out/server.js",
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
+    },
+    {
+      "name": "Launch",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/out/server.js",
+      "stopOnEntry": true,
+      "args": [],
+      "cwd": "${workspaceRoot}",
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "runtimeExecutable": null,
+      "runtimeArgs": ["--nolazy"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "externalConsole": false,
+      "sourceMaps": true
     }
   ]
 }

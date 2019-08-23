@@ -2,7 +2,7 @@ import {
   binStrToTernStr,
   binToNumberArray,
   fillBinStr,
-} from '../ternaryStringOperations';
+} from '../lib/ternaryStringOperations';
 
 describe('Binary string to ternary conversion', () => {
   const input = '001';

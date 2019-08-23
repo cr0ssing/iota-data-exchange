@@ -2,14 +2,14 @@ import * as converter from '@iota/converter';
 import { EMSGSIZE } from 'constants';
 import { type } from 'os';
 import DateTag from './DateTag';
-import DateTagOutOfRange from './errors/DateTagOutOfRange';
-import NoHashPrefixFound from './errors/NoHashPrefixFound';
+import DateTagOutOfRange from '../errors/DateTagOutOfRange';
+import NoHashPrefixFound from '../errors/NoHashPrefixFound';
 import { hash } from './hashingTree';
 import { dateTagFromBinStr } from './helpers';
 import { binStrToTrits } from './ternaryStringOperations';
-import { EFillOptions } from './typings/Constants';
-import { EDay, EMonth, EYear } from './typings/Date';
-import { IHashItem } from './typings/HashStore';
+import { EFillOptions } from '../typings/Constants';
+import { EDay, EMonth, EYear } from '../typings/Date';
+import { IHashItem } from '../typings/HashStore';
 
 export default class HashStore {
   private hashList: IHashItem[];

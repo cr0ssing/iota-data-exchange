@@ -1,8 +1,8 @@
 import { createKeyPair, toTrytes } from '@decentralized-auth/ntru';
-import DataReciever from './DataReciever';
+import { DataReciever } from './DataReciever';
 import DateTag from './DateTag';
 import { generateSeed } from './iotaUtils';
-import { EDataTypes } from './typings/messages/WelcomeMsg';
+import { EDataTypes } from '../typings/messages/WelcomeMsg';
 const seed =
   'HEEAXLXPIDUFFTLGNKQQYUNTRRCTYRSFOOFXGQRKNVEPGXWLURNXZPFCBVBCZRAKRMSXAGTNLTXMRPYDC';
 

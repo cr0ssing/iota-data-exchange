@@ -1,11 +1,11 @@
-import { getMinMaxRange } from '../binaryMinMax';
-import { buildStrBin, getDiff } from '../binaryStringOperations';
-import DateTag from '../DateTag';
+import { getMinMaxRange } from '../lib/binaryMinMax';
+import { buildStrBin, getDiff } from '../lib/binaryStringOperations';
+import DateTag from '../lib/DateTag';
 import {
   fromYears,
   getChildNodes,
   getNodesForHashing,
-} from '../treeCalculation';
+} from '../lib/treeCalculation';
 import { EDateTagProps, EDay, EMonth, EYear } from '../typings/Date';
 
 describe('Binary number', () => {

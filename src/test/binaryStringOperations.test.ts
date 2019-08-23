@@ -1,4 +1,4 @@
-import { buildStrBin } from '../binaryStringOperations';
+import { buildStrBin } from '../lib/binaryStringOperations';
 
 describe('Binary number', () => {
   const lenght = 3;
