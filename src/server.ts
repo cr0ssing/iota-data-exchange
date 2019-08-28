@@ -17,10 +17,6 @@ const recieverStore: Map<string, DataReciever> = new Map();
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(cors());
-app.post('/proprofe', function(req, res, next) {
-  console.log(req.body);
-  res.json(req.body);
-});
 
 app.get('/', (req, res) => {
   return res.send('HelloWorld');
@@ -33,9 +29,15 @@ app.post('/getKeyPair', (req, res) => {
 });
 
 app.get('/publisher/all', (req, res) => {
-  res.json(Array.from(publisherStore));
+  try {
+    // res.json({ key: 'val' });
+    res.json(Array.from(publisherStore).map(e => itemToJson(e[1], e[0])));
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
 });
-app.post('/addDataPublisher', async (req, res) => {
+app.post('/publisher/add', async (req, res) => {
   const pub = new DataPublisher();
   await pub.init({
     masterSecret: req.body.masterSecret,
@@ -44,36 +46,36 @@ app.post('/addDataPublisher', async (req, res) => {
   publisherStore.set(req.body.id, pub);
   return res.json(pub);
 });
-app.get('/getDataPublisher', (req, res) => {
+app.get('/publisher/get', (req, res) => {
   const pub = publisherStore.get(req.query.id);
-  return res.json(pub);
+  return res.json(itemToJson(pub, req.body.id));
 });
 app.get('/getDataPublisherMessages', (req, res) => {
   const pub = publisherStore.get(req.query.id);
   return res.json(pub.getMessageAddresses());
 });
 
-app.post('/runDataPublisher', async (req, res) => {
+app.post('/publisher/start/', async (req, res) => {
   const pub = publisherStore.get(req.body.id);
   try {
     const inte = await pub.run(5000);
-    return res.json(inte);
+    return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
     return res.json(error);
   }
 });
-app.post('/stopDataPublisher', async (req, res) => {
+app.post('/publisher/stop/', async (req, res) => {
   const pub = publisherStore.get(req.body.id);
   try {
     const inte = pub.stop();
-    return res.json(inte);
+    return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
     return res.json(error);
   }
 });
 
 // ---------------------------------------------------------
-app.post('/addDataOwner', async (req, res) => {
+app.post('/owner/add', async (req, res) => {
   try {
     const pub = new DataOwner();
     await pub.init({
@@ -81,19 +83,29 @@ app.post('/addDataOwner', async (req, res) => {
       seed: req.body.seed,
     });
     ownerStore.set(req.body.id, pub);
-    return res.json(pub);
+    return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
     console.log(error);
     return error;
   }
 });
-app.get('/getDataOwner', (req, res) => {
+app.get('/owner/get', (req, res) => {
   const pub = ownerStore.get(req.query.id);
-  return res.json(pub);
+  return res.json(itemToJson(pub, req.query.id));
 });
-app.get('/dataOwner/getAccessRequests', (req, res) => {
-  const pub = ownerStore.get(req.query.id);
-  return res.json(pub.getAccessRequests());
+app.get('/owner/all', (req, res) => {
+  res.json(Array.from(ownerStore).map(e => itemToJson(e[1], e[0])));
+});
+app.post('/owner/checkRequestAddress', async (req, res) => {
+  const pub = ownerStore.get(req.body.id);
+
+  try {
+    await pub.getAccessRequests();
+
+    return res.json(itemToJson(pub, req.body.id));
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 // ---------------------------------------------------------
@@ -114,7 +126,15 @@ app.post('/reciever/add', async (req, res) => {
 app.get('/reciever/get', async (req, res) => {
   try {
     const pub = recieverStore.get(req.query.id);
-    return res.json(pub);
+    return res.json(itemToJson(pub, req.query.id));
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+});
+app.get('/reciever/all', async (req, res) => {
+  try {
+    res.json(Array.from(recieverStore).map(e => itemToJson(e[1], e[0])));
   } catch (error) {
     console.log(error);
     return error;
@@ -122,15 +142,16 @@ app.get('/reciever/get', async (req, res) => {
 });
 app.post('/reciever/requestAccess', async (req, res) => {
   try {
-    const pub = recieverStore.get(req.query.id);
+    const pub = recieverStore.get(req.body.recieverId);
+    const peer = ownerStore.get(req.body.peer);
     const resp = await pub.requestAccess({
       dataType: 1,
       start: DateTag.fromString(req.body.start),
       end: DateTag.fromString(req.body.end),
-      peerAddress: req.body.peerAddress,
-      peerPubKey: req.body.peerPubKey,
+      peerAddress: peer.getSubscriptionRequestAddress(),
+      peerPubKey: peer.getPubKey(),
     });
-    return res.json(resp);
+    return res.json(itemToJson(pub, req.body.recieverId));
   } catch (error) {
     console.log(error);
     return error;
@@ -148,3 +169,19 @@ app.listen(process.env.PORT || 9999, () =>
 //   // @ts-ignore
 //   console.log(`Server started on port ${server.address().port} :)`);
 // });
+function replacer(key, value) {
+  if (key == 'runInterval') {
+    return true;
+  } else if (key == 'requests') {
+    return Array.from(value);
+  } else {
+    return value;
+  }
+}
+
+function itemToJson(item: any, id: string) {
+  return {
+    id,
+    data: JSON.parse(JSON.stringify(item, replacer)),
+  };
+}

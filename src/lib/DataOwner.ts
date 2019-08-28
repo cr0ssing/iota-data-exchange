@@ -51,7 +51,8 @@ export class DataOwner {
    * getAccessRequests
    */
   public async getAccessRequests() {
-    return this.subMan.fetchSubscriptionRequests();
+    const res = await this.subMan.fetchSubscriptionRequests();
+    return res;
   }
   /**
    * acceptAccessRequest

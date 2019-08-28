@@ -23,6 +23,7 @@ export class DataPublisher {
   private runInterval;
   private messages: string[] = [];
   private state: boolean = false;
+
   constructor() {}
   /**
    * init
@@ -76,6 +77,9 @@ export class DataPublisher {
    * run
    */
   public run(interval: number) {
+    if (this.runInterval) {
+      clearInterval(this.runInterval);
+    }
     this.runInterval = setInterval(async () => {
       const txs = await this.sentMessage(new Date().toTimeString());
       this.messages.push(txs[0].address);

@@ -6,6 +6,8 @@ import { Trytes } from '@iota/core/typings/types';
 import * as iotaJson from '@iota/extract-json';
 import { AES } from 'crypto-js';
 import { type } from 'os';
+import { IHashItem } from '../typings/HashStore';
+import { IRequestMsg, IWelcomeMsg } from '../typings/messages/WelcomeMsg';
 import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { hashCurl, hashFromBinStr } from './hashingTree';
@@ -19,15 +21,13 @@ import {
 } from './iotaUtils';
 import SubscriptionStore, { ISubscription } from './SubscriptionStore';
 import { getNodesBetween } from './treeCalculation';
-import { IHashItem } from '../typings/HashStore';
-import { IRequestMsg, IWelcomeMsg } from '../typings/messages/WelcomeMsg';
 export default class SubscriptionManager {
   public iota: API;
   public subscriptionRequestAddress: string;
+  public requests: Map<string, IRequestMsg>;
   private keyPair: KeyPair;
   private seed: string;
   private masterSecret: string;
-  private requests: Map<string, IRequestMsg>;
   private subscriptionStore: Map<string, ISubscription>;
   constructor({
     masterSecret,

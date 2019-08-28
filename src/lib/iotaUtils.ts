@@ -5,10 +5,10 @@ import { Trytes } from '@iota/core/typings/types';
 import { Bundle, Transaction } from '@iota/http-client/typings/types';
 import { AES, enc } from 'crypto-js';
 import { toUnicode } from 'punycode';
-import { defaultDepth, defaultMwm } from './config';
-import DateTag from './DateTag';
 import { IHashItem } from '../typings/HashStore';
 import { IRequestMsg, IWelcomeMsg } from '../typings/messages/WelcomeMsg';
+import { defaultDepth, defaultMwm } from './config';
+import DateTag from './DateTag';
 
 export function generateSeed(length = 81) {
   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ9';
