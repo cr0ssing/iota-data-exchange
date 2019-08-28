@@ -160,13 +160,14 @@ export default class SubscriptionManager {
    * acceptRequest
    */
   public async acceptRequest(requestBundleHash: string) {
+    const reqBundle = this.requests.get(requestBundleHash);
     const {
       dataType,
       nextAddress,
       endDate,
       pubKeyAddress,
       startDate,
-    } = this.requests.get(requestBundleHash);
+    } = reqBundle;
     const sub: ISubscription = {
       dataType,
       endDate,

@@ -3,6 +3,11 @@ import { createKeyPair, KeyPair, toTrytes } from '@decentralized-auth/ntru';
 import { tritsToTrytes, trytesToTrits } from '@iota/converter';
 import { Address, API, Bundle, composeAPI, Transaction } from '@iota/core/';
 import { generateKeyPair } from 'crypto';
+import {
+  EDataTypes,
+  IRequestMsg,
+  IWelcomeMsg,
+} from '../typings/messages/WelcomeMsg';
 import { defaultNodeAddress } from './config';
 import DateTag from './DateTag';
 import { hash, hashCurl } from './hashingTree';
@@ -17,11 +22,6 @@ import {
   sentMsgToTangle,
 } from './iotaUtils';
 import MamReaderExtended from './MamReaderExtendet';
-import {
-  EDataTypes,
-  IRequestMsg,
-  IWelcomeMsg,
-} from '../typings/messages/WelcomeMsg';
 
 export class DataReciever {
   public requests: IRequestsState = {
@@ -141,6 +141,7 @@ export class DataReciever {
       requestResponses,
       this.keyPair.private
     );
+    this.saveWelcomeMessage(res);
     // const bundles = groupBy(requestResponses, e => e.bundle);
     return res;
   }

@@ -107,6 +107,17 @@ app.post('/owner/checkRequestAddress', async (req, res) => {
     console.log(error);
   }
 });
+app.post('/owner/acceptRequest', async (req, res) => {
+  const pub = ownerStore.get(req.body.id);
+
+  try {
+    await pub.acceptAccessRequest(req.body.requestId);
+
+    return res.json(itemToJson(pub, req.body.id));
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 // ---------------------------------------------------------
 app.post('/reciever/add', async (req, res) => {
@@ -152,6 +163,17 @@ app.post('/reciever/requestAccess', async (req, res) => {
       peerPubKey: peer.getPubKey(),
     });
     return res.json(itemToJson(pub, req.body.recieverId));
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+});
+app.post('/reciever/checkOpenRequests', async (req, res) => {
+  try {
+    const pub = recieverStore.get(req.body.id);
+    console.log(pub);
+    await pub.checkOpenRequests();
+    return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
     console.log(error);
     return error;
