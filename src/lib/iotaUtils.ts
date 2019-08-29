@@ -77,7 +77,10 @@ export async function parseWelcomeMessage(
 
   return {
     bundle: bundle[0].bundle,
-    msg: obj,
+    msg: obj.hashList,
+    startRoot: obj.startRoot,
+    startDate: Object.setPrototypeOf(obj.startDate, DateTag.prototype),
+    endDate: Object.setPrototypeOf(obj.endDate, DateTag.prototype),
   };
 }
 
@@ -143,6 +146,9 @@ export interface IParsedRequestMessage {
 export interface IParsedWelcomeMessage {
   msg: IHashItem[];
   bundle: string;
+  startRoot: string;
+  startDate: DateTag;
+  endDate: DateTag;
 }
 
 export function extractSignatureFragments(bund: Bundle) {

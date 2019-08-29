@@ -1,8 +1,8 @@
 import { createKeyPair, toTrytes } from '@decentralized-auth/ntru';
+import { EDataTypes } from '../typings/messages/WelcomeMsg';
 import { DataReciever } from './DataReciever';
 import DateTag from './DateTag';
 import { generateSeed } from './iotaUtils';
-import { EDataTypes } from '../typings/messages/WelcomeMsg';
 const seed =
   'HEEAXLXPIDUFFTLGNKQQYUNTRRCTYRSFOOFXGQRKNVEPGXWLURNXZPFCBVBCZRAKRMSXAGTNLTXMRPYDC';
 
@@ -39,6 +39,7 @@ describe('Publish a access request', () => {
       dataType: EDataTypes.heartRate,
       peerAddress,
       peerPubKey,
+      publisherId: '',
     });
     expect(resp).not.toBe(undefined);
   });

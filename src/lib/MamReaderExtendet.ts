@@ -9,10 +9,10 @@ import { createHttpClient } from '@iota/http-client';
 import { MAM_MODE, MamReader } from 'mam.ts';
 import { hash } from 'mam.ts/out/src/hash';
 import { Decode } from 'mam.ts/src/Decode';
+import { IHashItem } from '../typings/HashStore';
 import { defaultNodeAddress } from './config';
 import HashStore, { HashList } from './HashStore';
 import { dateTagFromTxTag, tagTrytesToDateTag } from './helpers';
-import { IHashItem } from '../typings/HashStore';
 
 export default class MamReaderExtended {
   protected providerConf: Provider;
@@ -44,7 +44,12 @@ export default class MamReaderExtended {
     this.readerSiedeKey = sideKey;
     this.hashStore = new HashStore(hashList);
   }
-
+  /**
+   * getNextRoot
+   */
+  public getNextRoot() {
+    return this.reader.getNextRoot();
+  }
   public async decodeTagAndDecrypt() {
     const address = this.reader.getNextRoot();
     const hashedAddress = hash(address);
@@ -61,8 +66,9 @@ export default class MamReaderExtended {
   public async getMessage() {
     const tag = await this.decodeTagAndDecrypt();
     const key = this.hashStore.getKeyFromDatetag(tag);
-    this.reader.changeMode(this.reader.getNextRoot(), this.mamMode, key);
+    const root = this.reader.getNextRoot();
+    this.reader.changeMode(root, this.mamMode, key);
     const msg = await this.reader.fetchSingle();
-    return msg;
+    return { root, msg };
   }
 }

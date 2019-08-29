@@ -33,6 +33,13 @@ export class DataOwner {
     return await conn.getMsg();
   }
   /**
+   * fetchMessages
+   */
+  public async fetchMessages(connId: string) {
+    const conn = this.dataConnectors.get(connId);
+    return await conn.fetchAllMessages();
+  }
+  /**
    * addDataConnector
    */
   public addDataConnector({
@@ -67,7 +74,7 @@ export class DataOwner {
    * acceptAccessRequest
    */
   public async acceptAccessRequest(request: string) {
-    return this.subMan.acceptRequest(request);
+    return this.subMan.acceptRequest(request, this.dataConnectors);
   }
 }
 

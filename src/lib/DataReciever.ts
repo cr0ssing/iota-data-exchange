@@ -90,12 +90,14 @@ export class DataReciever {
     peerAddress,
     peerPubKey,
     dataType,
+    publisherId,
   }: {
     start: DateTag;
     end: DateTag;
     peerAddress: string;
     peerPubKey: string;
     dataType: EDataTypes;
+    publisherId: string;
   }) {
     const welcomeMsg: IRequestMsg = {
       dataType,
@@ -103,6 +105,7 @@ export class DataReciever {
       nextAddress: generateSeed(),
       pubKeyAddress: this.getPubKeyAddress(),
       startDate: start,
+      publisherId,
     };
     const pPubKey =
       peerPubKey.length === 81
@@ -134,16 +137,28 @@ export class DataReciever {
     if (openRequestAddresses.length === 0) {
       throw Error('no open Requests found');
     }
-    const requestResponses = await this.iota.findTransactionObjects({
-      addresses: openRequestAddresses,
+    openRequestAddresses.forEach(async address => {
+      try {
+        const requestResponses = await this.iota.findTransactionObjects({
+          addresses: [address],
+        });
+        const res = await parseWelcomeMessage(
+          requestResponses,
+          this.keyPair.private
+        );
+        this.requests.open = this.requests.open.filter(
+          e => e.msg.nextAddress !== address
+        );
+        this.requests.active = [...this.requests.active, res];
+        console.log(this.requests.active);
+        console.log(res);
+        this.saveWelcomeMessage(res);
+      } catch (error) {
+        console.log(error);
+      }
     });
-    const res = await parseWelcomeMessage(
-      requestResponses,
-      this.keyPair.private
-    );
-    this.saveWelcomeMessage(res);
     // const bundles = groupBy(requestResponses, e => e.bundle);
-    return res;
+    return;
   }
   /**
    * saveWelcomeMessages
@@ -162,7 +177,7 @@ export class DataReciever {
 
 interface IRequestsState {
   open: IDataRecieverRequest[];
-  active: IDataRecieverRequest[];
+  active: IParsedWelcomeMessage[];
   closed: IDataRecieverRequest[];
 }
 

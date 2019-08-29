@@ -1,9 +1,9 @@
 import { createKeyPair, KeyPair, toTrytes } from '@decentralized-auth/ntru';
+import { EDataTypes } from '../typings/messages/WelcomeMsg';
 import DateTag from './DateTag';
 import { generateSeed } from './iotaUtils';
 import SubscriptionManager from './SubscriptionManager';
 import { ISubscription } from './SubscriptionStore';
-import { EDataTypes } from '../typings/messages/WelcomeMsg';
 const seed =
   'HEEAXLXPIDUFFTLGNKQQYUNTRRCTYRSFOOFXGQRKNVEPGXWLURNXZPFCBVBCZRAKRMSXAGTNLTXMRPYDC';
 
@@ -104,6 +104,7 @@ describe('Sending Request accept message', () => {
       pubKey: toTrytes(keyPair.public),
       responseAddress: generateSeed(),
       startDate: new DateTag(2019, 7, 15),
+      startRoot: '',
     };
     const msg = await manager.sentRequestAcceptMsg(subscription);
     expect(msg).not.toBe('');

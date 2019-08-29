@@ -5,6 +5,7 @@ import * as cors from 'cors';
 import * as express from 'express';
 import * as http from 'http';
 import * as mongoose from 'mongoose';
+import { runInNewContext } from 'vm';
 import * as WebSocket from 'ws';
 import { DataOwner, DataPublisher, DataReciever } from './lib';
 import DataPublishConnector from './lib/DataPublishConnector';
@@ -136,7 +137,17 @@ app.post('/owner/getNextMessage', async (req, res) => {
   try {
     const pub = ownerStore.get(req.body.id);
     const msg = await pub.getMessage(req.body.pubId);
-    return res.json(msg);
+    return res.json(itemToJson(pub, req.body.id));
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error.toString());
+  }
+});
+app.post('/owner/fetchMessages', async (req, res) => {
+  try {
+    const pub = ownerStore.get(req.body.id);
+    const msg = await pub.fetchMessages(req.body.pubId);
+    return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
     console.log(error);
     return res.status(500).send(error.toString());
@@ -196,6 +207,7 @@ app.post('/reciever/requestAccess', async (req, res) => {
       end: DateTag.fromString(req.body.end),
       peerAddress: peer.getSubscriptionRequestAddress(),
       peerPubKey: peer.getPubKey(),
+      publisherId: req.body.publisherId,
     });
     return res.json(itemToJson(pub, req.body.recieverId));
   } catch (error) {
@@ -231,6 +243,8 @@ function replacer(key, value) {
   } else if (key == 'accessRequests') {
     return Array.from(value);
   } else if (key == 'dataConnectors') {
+    return Array.from(value);
+  } else if (key == 'decryptedMessages') {
     return Array.from(value);
   } else {
     return value;

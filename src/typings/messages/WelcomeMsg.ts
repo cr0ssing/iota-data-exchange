@@ -10,6 +10,7 @@ export interface IRequestMsg {
   dataType: EDataTypes;
   pubKeyAddress: string;
   nextAddress: string;
+  publisherId: string;
 }
 
 export interface IPubKey {}

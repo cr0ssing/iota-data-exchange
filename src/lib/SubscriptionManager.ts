@@ -9,6 +9,7 @@ import { type } from 'os';
 import { IHashItem } from '../typings/HashStore';
 import { IRequestMsg, IWelcomeMsg } from '../typings/messages/WelcomeMsg';
 import { defaultNodeAddress } from './config';
+import DataPublishConnector from './DataPublishConnector';
 import DateTag from './DateTag';
 import { hashCurl, hashFromBinStr } from './hashingTree';
 import { groupBy } from './helpers';
@@ -132,10 +133,16 @@ export default class SubscriptionManager {
    */
   public async sentRequestAcceptMsg(sub: ISubscription) {
     const hashList = this.getNodeHashesForDaterange(sub.startDate, sub.endDate);
-    const hashListJson = JSON.stringify(hashList);
+    const payload = {
+      hashList,
+      startRoot: sub.startRoot,
+      startDate: sub.startDate,
+      endDate: sub.endDate,
+    };
+    console.log(payload);
+    const hashListJson = JSON.stringify(payload);
 
     // encrypt the symetric key of the data with the pubKey
-    // FIXME make secret changeable
     const secret = this.masterSecret;
     const address = sub.responseAddress;
     const hashListEnc = AES.encrypt(hashListJson, secret).toString();
@@ -159,7 +166,10 @@ export default class SubscriptionManager {
   /**
    * acceptRequest
    */
-  public async acceptRequest(requestBundleHash: string) {
+  public async acceptRequest(
+    requestBundleHash: string,
+    dataConnectors: Map<string, DataPublishConnector>
+  ) {
     const reqBundle = this.accessRequests.get(requestBundleHash);
     const {
       dataType,
@@ -167,13 +177,16 @@ export default class SubscriptionManager {
       endDate,
       pubKeyAddress,
       startDate,
+      publisherId,
     } = reqBundle;
+    const nextRoot = dataConnectors.get(publisherId).getNextRoot();
     const sub: ISubscription = {
       dataType,
       endDate,
       pubKey: pubKeyAddress,
       responseAddress: nextAddress,
       startDate,
+      startRoot: nextRoot,
     };
     const acceptTrans = await this.sentRequestAcceptMsg(sub);
 

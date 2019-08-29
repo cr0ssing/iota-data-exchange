@@ -65,6 +65,7 @@ async function run() {
     dataType: 1,
     peerAddress: owner.getSubscriptionRequestAddress(),
     peerPubKey: owner.getPubKey(),
+    publisherId: '',
   });
 
   console.log('reciever requested access');

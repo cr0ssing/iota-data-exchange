@@ -12,6 +12,7 @@ export default class {
   private iota: API;
   private masterSecret: string;
   private streamMessages: Map<string, Transaction[]>;
+  private decryptedMessages: Map<string, string | object>;
   constructor({
     masterSecret,
     streamMessages,
@@ -24,6 +25,7 @@ export default class {
     this.masterSecret = masterSecret;
     this.streamMessages = streamMessages ? streamMessages : new Map();
     this.iota = iota ? iota : composeAPI({ provider: defaultNodeAddress });
+    this.decryptedMessages = new Map();
   }
   /**
    * connect
@@ -44,10 +46,35 @@ export default class {
     });
   }
   /**
+   * getNextRoot
+   */
+  public getNextRoot() {
+    return this.dataReader.getNextRoot();
+  }
+  /**
    * getMsg
    */
   public async getMsg() {
-    return await this.dataReader.getMessage();
+    const message = await this.dataReader.getMessage();
+    this.decryptedMessages.set(message.root, message.msg);
+    return message;
+  }
+  /**
+   * fetchAllMessages
+   */
+  public async fetchAllMessages() {
+    let fetchedAll = false;
+    let messages = [];
+    while (!fetchedAll) {
+      try {
+        const message = await this.dataReader.getMessage();
+        this.decryptedMessages.set(message.root, message.msg);
+        messages = [...messages, message];
+      } catch (error) {
+        fetchedAll = true;
+      }
+    }
+    return messages;
   }
 }
 type TStreamMessages = Map<string, Transaction[]>;
