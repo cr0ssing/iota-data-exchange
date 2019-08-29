@@ -103,3 +103,37 @@ describe('ToString concertion', () => {
     expect(dateStr).toBe('20191015');
   });
 });
+describe('fromString convertion', () => {
+  it('should be the same with  single number month and day', () => {
+    const dateStr = '20190808';
+    const dateObj = DateTag.fromString(dateStr);
+    expect(dateObj.year).toBe(2019);
+    expect(dateObj.month).toBe(8);
+    expect(dateObj.day).toBe(8);
+    expect(dateObj.toString()).toBe(dateStr);
+  });
+  it('should be the same with  double number month and day', () => {
+    const dateStr = '20191115';
+    const dateObj = DateTag.fromString(dateStr);
+    expect(dateObj.year).toBe(2019);
+    expect(dateObj.month).toBe(11);
+    expect(dateObj.day).toBe(15);
+    expect(dateObj.toString()).toBe(dateStr);
+  });
+  it('should be the same with  double number month and single number  day', () => {
+    const dateStr = '20191001';
+    const dateObj = DateTag.fromString(dateStr);
+    expect(dateObj.year).toBe(2019);
+    expect(dateObj.month).toBe(10);
+    expect(dateObj.day).toBe(1);
+    expect(dateObj.toString()).toBe(dateStr);
+  });
+  it('should be the same with  single number month and double number  day', () => {
+    const dateStr = '20190110';
+    const dateObj = DateTag.fromString(dateStr);
+    expect(dateObj.year).toBe(2019);
+    expect(dateObj.month).toBe(1);
+    expect(dateObj.day).toBe(10);
+    expect(dateObj.toString()).toBe(dateStr);
+  });
+});

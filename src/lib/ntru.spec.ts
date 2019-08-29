@@ -14,7 +14,7 @@ import {
 } from './ntru';
 
 describe('NTRU', () => {
-  it('should do the same', async () => {
+  it.skip('should do the same', async () => {
     const seed = defaultSeed;
 
     const a = createKeyPair(seed);

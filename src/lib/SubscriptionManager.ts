@@ -24,7 +24,7 @@ import { getNodesBetween } from './treeCalculation';
 export default class SubscriptionManager {
   public iota: API;
   public subscriptionRequestAddress: string;
-  public requests: Map<string, IRequestMsg>;
+  public accessRequests: Map<string, IRequestMsg>;
   private keyPair: KeyPair;
   private seed: string;
   private masterSecret: string;
@@ -41,7 +41,7 @@ export default class SubscriptionManager {
     subscriptionRequestAddress?: string;
   }) {
     this.subscriptionStore = new Map();
-    this.requests = new Map();
+    this.accessRequests = new Map();
     this.masterSecret = masterSecret;
     if (keyPair) {
       this.keyPair = keyPair;
@@ -124,7 +124,7 @@ export default class SubscriptionManager {
     });
     const results = await Promise.all(promises);
 
-    results.forEach(v => this.requests.set(v.bundle, v.msg));
+    results.forEach(v => this.accessRequests.set(v.bundle, v.msg));
     return results;
   }
   /**
@@ -136,7 +136,7 @@ export default class SubscriptionManager {
 
     // encrypt the symetric key of the data with the pubKey
     // FIXME make secret changeable
-    const secret = 'SomeSecret';
+    const secret = this.masterSecret;
     const address = sub.responseAddress;
     const hashListEnc = AES.encrypt(hashListJson, secret).toString();
     const hashListTrytes = asciiToTrytes(hashListEnc);
@@ -160,7 +160,7 @@ export default class SubscriptionManager {
    * acceptRequest
    */
   public async acceptRequest(requestBundleHash: string) {
-    const reqBundle = this.requests.get(requestBundleHash);
+    const reqBundle = this.accessRequests.get(requestBundleHash);
     const {
       dataType,
       nextAddress,

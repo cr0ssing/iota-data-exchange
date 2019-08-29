@@ -11,7 +11,7 @@ describe('Obkect initilizilation', () => {
 });
 describe('Publish message', () => {
   it('publish a message encypted', async () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(100000);
     const dataPublisher = new DataPublisher();
     await dataPublisher.init({
       masterSecret,

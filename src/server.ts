@@ -1,15 +1,18 @@
 // import express = require("express");
 
 import { createKeyPair, toTrytes } from '@decentralized-auth/ntru';
-import * as express from 'express';
-
 import * as cors from 'cors';
+import * as express from 'express';
 import * as http from 'http';
+import * as mongoose from 'mongoose';
 import * as WebSocket from 'ws';
 import { DataOwner, DataPublisher, DataReciever } from './lib';
+import DataPublishConnector from './lib/DataPublishConnector';
 import DateTag from './lib/DateTag';
+import { hashListFromDatatags } from './lib/hashingTree';
 const app = express();
 const router = express.Router();
+
 const publisherStore: Map<string, DataPublisher> = new Map();
 const ownerStore: Map<string, DataOwner> = new Map();
 const recieverStore: Map<string, DataReciever> = new Map();
@@ -38,13 +41,35 @@ app.get('/publisher/all', (req, res) => {
   }
 });
 app.post('/publisher/add', async (req, res) => {
-  const pub = new DataPublisher();
-  await pub.init({
-    masterSecret: req.body.masterSecret,
-    seed: req.body.seed,
-  });
-  publisherStore.set(req.body.id, pub);
-  return res.json(pub);
+  try {
+    const owner = ownerStore.get(req.body.peer);
+    const pub = new DataPublisher();
+
+    await pub.init({
+      masterSecret: req.body.masterSecret,
+      seed: req.body.seed,
+    });
+    const connector = new DataPublishConnector({
+      masterSecret: req.body.masterSecret,
+    });
+    await connector.connect(
+      pub.getNextRoot(),
+      hashListFromDatatags(
+        req.body.masterSecret,
+        new DateTag(2019, 1, 1),
+        new DateTag(2020, 12, 31)
+      )
+    );
+    owner.addDataConnector({
+      conn: connector,
+      id: req.body.id,
+    });
+    publisherStore.set(req.body.id, pub);
+
+    return res.json(itemToJson(pub, req.body.id));
+  } catch (error) {
+    console.log(error);
+  }
 });
 app.get('/publisher/get', (req, res) => {
   const pub = publisherStore.get(req.query.id);
@@ -105,6 +130,16 @@ app.post('/owner/checkRequestAddress', async (req, res) => {
     return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
     console.log(error);
+  }
+});
+app.post('/owner/getNextMessage', async (req, res) => {
+  try {
+    const pub = ownerStore.get(req.body.id);
+    const msg = await pub.getMessage(req.body.pubId);
+    return res.json(msg);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error.toString());
   }
 });
 app.post('/owner/acceptRequest', async (req, res) => {
@@ -171,7 +206,6 @@ app.post('/reciever/requestAccess', async (req, res) => {
 app.post('/reciever/checkOpenRequests', async (req, res) => {
   try {
     const pub = recieverStore.get(req.body.id);
-    console.log(pub);
     await pub.checkOpenRequests();
     return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
@@ -194,7 +228,9 @@ app.listen(process.env.PORT || 9999, () =>
 function replacer(key, value) {
   if (key == 'runInterval') {
     return true;
-  } else if (key == 'requests') {
+  } else if (key == 'accessRequests') {
+    return Array.from(value);
+  } else if (key == 'dataConnectors') {
     return Array.from(value);
   } else {
     return value;

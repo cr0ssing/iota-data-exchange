@@ -9,12 +9,12 @@ export default class DateTag implements IDateTag {
   public static fromString(str: string) {
     if (str.length >= 8) {
       const year = parseInt(str.substring(0, 4), 10);
-      const month = parseInt(str.substring(5, 6), 10);
-      const day = parseInt(str.substring(7, 8), 10);
+      const month = parseInt(str.substring(4, 6), 10);
+      const day = parseInt(str.substring(6, 8), 10);
       const hour =
-        str.length >= 10 ? parseInt(str.substring(9, 10), 10) : undefined;
+        str.length >= 10 ? parseInt(str.substring(8, 10), 10) : undefined;
       const minute =
-        str.length >= 12 ? parseInt(str.substring(11, 12), 10) : undefined;
+        str.length >= 12 ? parseInt(str.substring(10, 12), 10) : undefined;
       return new DateTag(year, month, day, hour, minute);
     } else {
       throw Error(`${str.length} is an invalid string size`);

@@ -1,4 +1,5 @@
 import { MamReader } from 'mam.ts/typings/src';
+import { runInThisContext } from 'vm';
 import DataPublishConnector from './DataPublishConnector';
 import SubscriptionManager from './SubscriptionManager';
 
@@ -22,6 +23,14 @@ export class DataOwner {
       subscriptionRequestAddress,
     });
     const subManinit = await this.subMan.init();
+  }
+  /**
+   * getMessage
+   */
+  public async getMessage(connId: string) {
+    const conn = this.dataConnectors.get(connId);
+    console.log(conn);
+    return await conn.getMsg();
   }
   /**
    * addDataConnector
