@@ -9,6 +9,7 @@ import {
   IWelcomeMsg,
 } from '../typings/messages/WelcomeMsg';
 import { defaultNodeAddress } from './config';
+import DataPublishConnector from './DataPublishConnector';
 import DateTag from './DateTag';
 import { hash, hashCurl } from './hashingTree';
 import HashStore from './HashStore';
@@ -33,13 +34,16 @@ export class DataReciever {
   private keyPair: KeyPair;
   private pubKeyAddress: string;
   private iota: API;
-  private dataReader: MamReaderExtended;
   private hashStore: HashStore;
+  private dataConnectors: Map<string, DataPublishConnector>;
+
   constructor({ seed }: { seed: string }) {
     this.iota = composeAPI({
       provider: defaultNodeAddress,
     });
     this.seed = seed ? seed : generateSeed();
+    this.dataConnectors = new Map();
+    this.hashStore = new HashStore([]);
   }
   /**
    * init
@@ -47,7 +51,6 @@ export class DataReciever {
   public async init() {
     this.keyPair = await createKeyPair(this.seed);
     this.pubKeyAddress = await this.publishPubKey();
-    this.hashStore = new HashStore([]);
   }
   /**
    * publishPubKey
@@ -163,8 +166,20 @@ export class DataReciever {
   /**
    * saveWelcomeMessages
    */
-  public saveWelcomeMessage(msg: IParsedWelcomeMessage) {
+  public async saveWelcomeMessage(msg: IParsedWelcomeMessage) {
     this.hashStore.addToHashList(msg.msg);
+    const connector = new DataPublishConnector({});
+    try {
+      await connector.connect(msg.startRoot, msg.msg);
+    } catch (error) {
+      throw error;
+    }
+    this.dataConnectors.set(msg.bundle, connector);
+  }
+  public async fetchMessages(connId: string) {
+    const conn = this.dataConnectors.get(connId);
+    await conn.fetchAllMessages();
+    return;
   }
   private addRequest(request: IDataRecieverRequest) {
     if (this.requests.open) {

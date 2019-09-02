@@ -18,7 +18,7 @@ export default class {
     streamMessages,
     iota,
   }: {
-    masterSecret: string;
+    masterSecret?: string;
     streamMessages?: TStreamMessages;
     iota?: API;
   }) {

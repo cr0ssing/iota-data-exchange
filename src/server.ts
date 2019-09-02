@@ -225,6 +225,16 @@ app.post('/reciever/checkOpenRequests', async (req, res) => {
     return error;
   }
 });
+app.post('/reciever/fetchMessages', async (req, res) => {
+  try {
+    const pub = recieverStore.get(req.body.id);
+    await pub.fetchMessages(req.body.connId);
+    return res.json(itemToJson(pub, req.body.id));
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+});
 
 // ---------------------------------------------------------
 // ---------------------------------------------------------
