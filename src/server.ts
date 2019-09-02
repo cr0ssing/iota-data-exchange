@@ -49,6 +49,9 @@ app.post('/publisher/add', async (req, res) => {
     await pub.init({
       masterSecret: req.body.masterSecret,
       seed: req.body.seed,
+      dataType: req.body.dataType,
+      fitbitAccessToken: req.body.fitbitAccessToken,
+      fitbitUserId: req.body.fitbitUserId,
     });
     const connector = new DataPublishConnector({
       masterSecret: req.body.masterSecret,

@@ -20,6 +20,7 @@ const inits = [
   publisher.init({
     masterSecret,
     seed: defaultSeedPublisher,
+    dataType: 'timestamp',
   }),
   owner.init({
     masterSecret,

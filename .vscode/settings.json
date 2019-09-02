@@ -59,5 +59,8 @@
     "**/.git/objects/**": true,
     "**/.git/subtree-cache/**": true,
     "**/node_modules/*/**": true
+  },
+  "remote.extensionKind": {
+    "ms-azuretools.vscode-docker": "workspace"
   }
 }

@@ -1,7 +1,9 @@
 import { asciiToTrytes } from '@iota/converter';
 import { API, composeAPI } from '@iota/core';
+import Axios from 'axios';
 import { MAM_MODE, MAM_SECURITY, MamReader } from 'mam.ts';
 import { Mam } from 'mam.ts/out/src';
+import { userInfo } from 'os';
 import { MamWriter } from '../mam/src';
 import { defaultDepth, defaultMwm, defaultNodeAddress } from './config';
 import DateTag from './DateTag';
@@ -23,6 +25,9 @@ export class DataPublisher {
   private runInterval;
   private messages: string[] = [];
   private state: boolean = false;
+  private dataType: string;
+  private fitbitUserId?: string;
+  private fitbitAccessToken?: string;
 
   constructor() {}
   /**
@@ -31,11 +36,18 @@ export class DataPublisher {
   public async init({
     masterSecret,
     seed,
+    dataType = 'timestamp',
+    fitbitUserId,
+    fitbitAccessToken,
     securityLevel = MAM_SECURITY.LEVEL_1,
     initialSideKey = 'unsecure',
   }: {
     masterSecret: string;
     seed: string;
+    dataType?: string;
+    fitbitUserId?: string;
+    fitbitAccessToken?: string;
+
     securityLevel?: MAM_SECURITY;
     initialSideKey?: string;
   }) {
@@ -46,7 +58,14 @@ export class DataPublisher {
     this.masterSecret = masterSecret;
     this.secretMap = new Map();
     this.securitsLevel = securityLevel;
-
+    this.dataType = dataType;
+    this.fitbitUserId = fitbitUserId;
+    this.fitbitAccessToken = fitbitAccessToken;
+    if (dataType === 'fitbit') {
+      if (!(this.fitbitAccessToken && this.fitbitUserId)) {
+        throw Error('username or accesstoken not given');
+      }
+    }
     this.writer = new MamWriter(
       defaultNodeAddress,
       seed,
@@ -81,7 +100,24 @@ export class DataPublisher {
       clearInterval(this.runInterval);
     }
     this.runInterval = setInterval(async () => {
-      const txs = await this.sentMessage(new Date().toTimeString());
+      let txs = [];
+      if (this.dataType === 'fitbit') {
+        try {
+          // tslint:disable-next-line: max-line-length
+          const url = `https://api.fitbit.com/1/user/${this.fitbitUserId}/activities/heart/date/2019-05-15/1d/1sec.json`;
+          const resp = await Axios.get(url, {
+            headers: {
+              Authorization: `Bearer ${this.fitbitAccessToken}`,
+            },
+          });
+          console.log(JSON.stringify(resp.data));
+          txs = await this.sentMessage(JSON.stringify(resp.data));
+        } catch (error) {
+          throw error;
+        }
+      } else {
+        txs = await this.sentMessage(new Date().toLocaleTimeString());
+      }
       this.messages.push(txs[0].address);
       console.log(`Message published at ${txs[0].address} from ${this.seed}`);
     }, interval);
@@ -128,17 +164,22 @@ export class DataPublisher {
       root: string;
       address: string;
     } = await this.writer.create(msg);
-    const attachedMsg = await this.writer.attach(
-      mamMsg.payload,
-      mamMsg.address,
-      defaultDepth,
-      defaultMwm
-    );
-    console.log(`
-    TagPlain = ${dateTag.toString()} \n
-    TagTrytes = ${tag} \n
-    transactions = ${attachedMsg.toString()}
-    `);
-    return attachedMsg;
+    try {
+      const attachedMsg = await this.writer.attach(
+        mamMsg.payload,
+        mamMsg.address,
+        defaultDepth,
+        defaultMwm
+      );
+      console.log(`
+      TagPlain = ${dateTag.toString()} \n
+      TagTrytes = ${tag} \n
+      transactions = ${attachedMsg.toString()}
+      `);
+      return attachedMsg;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }
