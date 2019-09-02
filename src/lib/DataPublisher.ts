@@ -114,8 +114,11 @@ export class DataPublisher {
     const dateTag = new DateTag(
       date.getFullYear(),
       date.getMonth() + 1,
-      date.getDate()
+      date.getDate(),
+      date.getHours(),
+      date.getMinutes()
     );
+
     const tag = dateTag.toTrytes();
     this.writer.setTag(tag);
     const sideKey = hashFromDatetag(this.masterSecret, dateTag);
@@ -131,6 +134,11 @@ export class DataPublisher {
       defaultDepth,
       defaultMwm
     );
+    console.log(`
+    TagPlain = ${dateTag.toString()} \n
+    TagTrytes = ${tag} \n
+    transactions = ${attachedMsg.toString()}
+    `);
     return attachedMsg;
   }
 }

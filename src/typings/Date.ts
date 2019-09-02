@@ -45,9 +45,33 @@ export enum EDay {
   posStart = 18,
   posEnd = 24,
 }
+export enum EHour {
+  max = 31,
+  min = 0,
+  depth = Math.ceil(Math.log2(max)),
+  posStart = 24,
+  posEnd = 30,
+}
+export enum EMinute {
+  max = 64,
+  min = 0,
+  depth = Math.ceil(Math.log2(max)),
+  posStart = 30,
+  posEnd = 37,
+}
+export enum ESecond {
+  max = 64,
+  min = 0,
+  depth = Math.ceil(Math.log2(max)),
+  posStart = 37,
+  posEnd = 44,
+}
 
 export enum EDateTagProps {
   YEAR = 'year',
   MONTH = 'month',
   DAY = 'day',
+  HOUR = 'hour',
+  MINUTE = 'minute',
+  SECOND = 'second',
 }

@@ -1,5 +1,15 @@
 import { asciiToTrytes } from '@iota/converter';
-import { EDay, EMonth, EYear, IDateTag, IMonth, IYear } from '../typings/Date';
+import {
+  EDay,
+  EHour,
+  EMinute,
+  EMonth,
+  ESecond,
+  EYear,
+  IDateTag,
+  IMonth,
+  IYear,
+} from '../typings/Date';
 import { buildStrBin } from './binaryStringOperations';
 /**
  * Date tag
@@ -15,7 +25,9 @@ export default class DateTag implements IDateTag {
         str.length >= 10 ? parseInt(str.substring(8, 10), 10) : undefined;
       const minute =
         str.length >= 12 ? parseInt(str.substring(10, 12), 10) : undefined;
-      return new DateTag(year, month, day, hour, minute);
+      const second =
+        str.length >= 14 ? parseInt(str.substring(12, 14), 10) : undefined;
+      return new DateTag(year, month, day, hour, minute, second);
     } else {
       throw Error(`${str.length} is an invalid string size`);
     }
@@ -57,9 +69,12 @@ export default class DateTag implements IDateTag {
     const year = this.year.toString();
     const month =
       this.month < 10 ? '0' + this.month.toString() : this.month.toString();
-    const day = this.day < 10 ? '0' + this.day.toString() : this.day.toString();
+    const day = this.toStringHelper(this.day);
+    const hour = this.toStringHelper(this.hour);
+    const minute = this.toStringHelper(this.minute);
+    const second = this.toStringHelper(this.second);
     // TODO Extend to support hours and minutes
-    return year + month + day;
+    return year + month + day + hour + minute + second;
   }
   /**
    * toTrytes
@@ -71,11 +86,14 @@ export default class DateTag implements IDateTag {
    * Get binary string of a date
    */
   public toBinStr() {
-    const year = buildStrBin(this.year.toString(2), EYear.depth);
-    const month = buildStrBin(this.month.toString(2), EMonth.depth);
-    const day = buildStrBin(this.day.toString(2), EDay.depth);
+    const year = this.toBinStringHelper(this.year, EYear.depth);
+    const month = this.toBinStringHelper(this.month, EMonth.depth);
+    const day = this.toBinStringHelper(this.day, EDay.depth);
+    const hour = this.toBinStringHelper(this.hour, EHour.depth);
+    const minute = this.toBinStringHelper(this.minute, EMinute.depth);
+    const second = this.toBinStringHelper(this.second, ESecond.depth);
     // TODO Extend to support hours and minutes
-    return year + month + day;
+    return year + month + day + hour + minute + second;
   }
   /**
    * compare
@@ -100,6 +118,20 @@ export default class DateTag implements IDateTag {
           return 0;
         }
       }
+    }
+  }
+  private toStringHelper(number: number | undefined): string {
+    if (!number) {
+      return '';
+    } else {
+      return number < 10 ? '0' + number.toString() : number.toString();
+    }
+  }
+  private toBinStringHelper(number: number | undefined, depth: number): string {
+    if (!number) {
+      return '';
+    } else {
+      return buildStrBin(number.toString(2), depth);
     }
   }
 }

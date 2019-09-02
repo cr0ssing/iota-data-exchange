@@ -73,17 +73,25 @@ app.post('/publisher/add', async (req, res) => {
   }
 });
 app.get('/publisher/get', (req, res) => {
-  const pub = publisherStore.get(req.query.id);
-  return res.json(itemToJson(pub, req.body.id));
+  try {
+    const pub = publisherStore.get(req.query.id);
+    return res.json(itemToJson(pub, req.body.id));
+  } catch (error) {
+    console.log(error);
+  }
 });
 app.get('/getDataPublisherMessages', (req, res) => {
-  const pub = publisherStore.get(req.query.id);
-  return res.json(pub.getMessageAddresses());
+  try {
+    const pub = publisherStore.get(req.query.id);
+    return res.json(pub.getMessageAddresses());
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 app.post('/publisher/start/', async (req, res) => {
-  const pub = publisherStore.get(req.body.id);
   try {
+    const pub = publisherStore.get(req.body.id);
     const inte = await pub.run(5000);
     return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
@@ -91,8 +99,8 @@ app.post('/publisher/start/', async (req, res) => {
   }
 });
 app.post('/publisher/stop/', async (req, res) => {
-  const pub = publisherStore.get(req.body.id);
   try {
+    const pub = publisherStore.get(req.body.id);
     const inte = pub.stop();
     return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
@@ -116,16 +124,24 @@ app.post('/owner/add', async (req, res) => {
   }
 });
 app.get('/owner/get', (req, res) => {
-  const pub = ownerStore.get(req.query.id);
-  return res.json(itemToJson(pub, req.query.id));
+  try {
+    const pub = ownerStore.get(req.query.id);
+    return res.json(itemToJson(pub, req.query.id));
+  } catch (error) {
+    console.log(error);
+  }
 });
+
 app.get('/owner/all', (req, res) => {
-  res.json(Array.from(ownerStore).map(e => itemToJson(e[1], e[0])));
+  try {
+    res.json(Array.from(ownerStore).map(e => itemToJson(e[1], e[0])));
+  } catch (error) {
+    console.log(error);
+  }
 });
 app.post('/owner/checkRequestAddress', async (req, res) => {
-  const pub = ownerStore.get(req.body.id);
-
   try {
+    const pub = ownerStore.get(req.body.id);
     await pub.getAccessRequests();
 
     return res.json(itemToJson(pub, req.body.id));
@@ -154,9 +170,8 @@ app.post('/owner/fetchMessages', async (req, res) => {
   }
 });
 app.post('/owner/acceptRequest', async (req, res) => {
-  const pub = ownerStore.get(req.body.id);
-
   try {
+    const pub = ownerStore.get(req.body.id);
     await pub.acceptAccessRequest(req.body.requestId);
 
     return res.json(itemToJson(pub, req.body.id));

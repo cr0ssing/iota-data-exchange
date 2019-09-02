@@ -153,8 +153,6 @@ export class DataReciever {
           e => e.msg.nextAddress !== address
         );
         this.requests.active = [...this.requests.active, res];
-        console.log(this.requests.active);
-        console.log(res);
         this.saveWelcomeMessage(res);
       } catch (error) {
         console.log(error);

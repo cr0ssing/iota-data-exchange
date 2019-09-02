@@ -9,11 +9,11 @@ import {
 } from '@iota/converter';
 import { Tag, Transaction, Trytes } from '@iota/core/typings/types';
 import { StringDecoder } from 'string_decoder';
+import { EFillOptions } from '../typings/Constants';
+import { EDay, EMonth, EYear } from '../typings/Date';
 import DateTag from './DateTag';
 import { hashCurl } from './hashingTree';
 import { asciiToTrits } from './ternaryStringOperations';
-import { EFillOptions } from '../typings/Constants';
-import { EDay, EMonth, EYear } from '../typings/Date';
 
 export function dateTagFromBinStr(binStr: string, fill: EFillOptions) {
   const binStrRepl = binStr.replace('X', fill);
@@ -57,10 +57,6 @@ export function tagTrytesToDateTag(trytes: Trytes) {
 
 export function dateTagFromTxTag(trytes: Trytes) {
   const tagString = tagTrytesToDateTag(trytes);
-  const date = new DateTag(
-    parseInt(tagString.substr(0, 4), 10),
-    parseInt(tagString.substr(4, 2), 10),
-    parseInt(tagString.substr(6, 2), 10)
-  );
+  const date = DateTag.fromString(tagString);
   return date;
 }
