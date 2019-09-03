@@ -171,6 +171,7 @@ export default class SubscriptionManager {
     dataConnectors: Map<string, DataPublishConnector>
   ) {
     const reqBundle = this.accessRequests.get(requestBundleHash);
+
     const {
       dataType,
       nextAddress,
@@ -179,7 +180,18 @@ export default class SubscriptionManager {
       startDate,
       publisherId,
     } = reqBundle;
-    const nextRoot = dataConnectors.get(publisherId).getNextRoot();
+
+    const connector = dataConnectors.get(publisherId);
+    if (!connector) {
+      throw Error(`No Data Connector with id ${publisherId}`);
+    }
+    await connector.fetchAllMessages();
+    const tagString = startDate.toString().substring(0, 8);
+    const nextRoot = connector.dateMap.get(tagString);
+    if (!nextRoot) {
+      throw Error('No Message in stream with given Tag');
+    }
+
     const sub: ISubscription = {
       dataType,
       endDate,

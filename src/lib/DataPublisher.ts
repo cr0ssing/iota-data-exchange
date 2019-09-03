@@ -116,7 +116,7 @@ export class DataPublisher {
           throw error;
         }
       } else {
-        txs = await this.sentMessage(new Date().toLocaleTimeString());
+        txs = await this.sentMessage(new Date().toDateString());
       }
       this.messages.push(txs[0].address);
       console.log(`Message published at ${txs[0].address} from ${this.seed}`);

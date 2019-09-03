@@ -68,7 +68,12 @@ export default class MamReaderExtended {
     const key = this.hashStore.getKeyFromDatetag(tag);
     const root = this.reader.getNextRoot();
     this.reader.changeMode(root, this.mamMode, key);
-    const msg = await this.reader.fetchSingle();
-    return { root, msg };
+    try {
+      const msg = await this.reader.fetchSingle();
+      return { root, msg, tag };
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }

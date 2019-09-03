@@ -1,5 +1,3 @@
-import { MamReader } from 'mam.ts/typings/src';
-import { runInThisContext } from 'vm';
 import DataPublishConnector from './DataPublishConnector';
 import SubscriptionManager from './SubscriptionManager';
 

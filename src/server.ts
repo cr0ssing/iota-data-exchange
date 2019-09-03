@@ -274,6 +274,8 @@ function replacer(key, value) {
     return Array.from(value);
   } else if (key == 'decryptedMessages') {
     return Array.from(value);
+  } else if (key == 'dateMap') {
+    return Array.from(value);
   } else {
     return value;
   }

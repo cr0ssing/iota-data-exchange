@@ -8,6 +8,7 @@ import { tagTrytesToDateTag } from './helpers';
 import MamReaderExtended from './MamReaderExtendet';
 
 export default class {
+  public dateMap: Map<string, string>;
   private dataReader: MamReaderExtended;
   private iota: API;
   private masterSecret: string;
@@ -26,6 +27,7 @@ export default class {
     this.streamMessages = streamMessages ? streamMessages : new Map();
     this.iota = iota ? iota : composeAPI({ provider: defaultNodeAddress });
     this.decryptedMessages = new Map();
+    this.dateMap = new Map();
   }
   /**
    * connect
@@ -69,6 +71,10 @@ export default class {
       try {
         const message = await this.dataReader.getMessage();
         this.decryptedMessages.set(message.root, message.msg);
+        const tagString = message.tag.toString().substring(0, 8);
+        if (!this.dateMap.has(tagString)) {
+          this.dateMap.set(tagString, message.root);
+        }
         messages = [...messages, message];
       } catch (error) {
         fetchedAll = true;
