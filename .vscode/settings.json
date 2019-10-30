@@ -62,5 +62,16 @@
   },
   "remote.extensionKind": {
     "ms-azuretools.vscode-docker": "workspace"
-  }
+  },
+  "todo-tree.highlights.customHighlight": {
+    "TODO": {
+      "icon": "checklist",
+      "iconColour": "green"
+    },
+    "FIXME": {
+      "icon": "flame",
+      "iconColour": "orange"
+    }
+  },
+  "todo-tree.regex.regex": "((//|#|\\*|<!--|;|/\\*|^)\\s*($TAGS)|^\\s*- \\[ \\])"
 }

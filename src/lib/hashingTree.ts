@@ -1,5 +1,6 @@
 import * as converter from '@iota/converter';
 import Curl from '@iota/curl';
+
 import DateTag from './DateTag';
 import { HashList } from './HashStore';
 import { asciiToTrits, binStrToTrits } from './ternaryStringOperations';

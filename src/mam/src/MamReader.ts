@@ -91,6 +91,9 @@ export class MamReader {
                                 console.log(nextRoot);
                                 console.log('Converted Message');
                                 console.log(ConvertedMsg);
+                                console.log('Sidekey');
+                                console.log(this.sideKey);
+
 
                                 reject(`failed to parse: ${e}`);
                             }

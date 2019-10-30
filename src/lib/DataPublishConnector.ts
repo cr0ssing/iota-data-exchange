@@ -14,6 +14,8 @@ export default class {
   private masterSecret: string;
   private streamMessages: Map<string, Transaction[]>;
   private decryptedMessages: Map<string, string | object>;
+  private performanceMap: Map<string, object>;
+
   constructor({
     masterSecret,
     streamMessages,
@@ -28,6 +30,7 @@ export default class {
     this.iota = iota ? iota : composeAPI({ provider: defaultNodeAddress });
     this.decryptedMessages = new Map();
     this.dateMap = new Map();
+    this.performanceMap = new Map();
   }
   /**
    * connect
@@ -70,7 +73,9 @@ export default class {
     while (!fetchedAll) {
       try {
         const message = await this.dataReader.getMessage();
+
         this.decryptedMessages.set(message.root, message.msg);
+        this.performanceMap.set(message.root, message.performance);
         const tagString = message.tag.toString().substring(0, 8);
         if (!this.dateMap.has(tagString)) {
           this.dateMap.set(tagString, message.root);

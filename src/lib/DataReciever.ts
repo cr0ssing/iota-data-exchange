@@ -3,12 +3,18 @@ import { createKeyPair, KeyPair, toTrytes } from '@decentralized-auth/ntru';
 import { tritsToTrytes, trytesToTrits } from '@iota/converter';
 import { Address, API, Bundle, composeAPI, Transaction } from '@iota/core/';
 import { generateKeyPair } from 'crypto';
+import { CreateAttachToTangleWithPwrSvr } from '../mam/src/PwrSrv';
 import {
   EDataTypes,
   IRequestMsg,
   IWelcomeMsg,
 } from '../typings/messages/WelcomeMsg';
-import { defaultNodeAddress } from './config';
+import {
+  defaultDepth,
+  defaultMwm,
+  defaultNodeAddress,
+  defaultPowApiKey,
+} from './config';
 import DataPublishConnector from './DataPublishConnector';
 import DateTag from './DateTag';
 import { hash, hashCurl } from './hashingTree';
@@ -30,6 +36,7 @@ export class DataReciever {
     closed: [],
     open: [],
   };
+  public performanceMap: Map<string, object>;
   private seed: string;
   private keyPair: KeyPair;
   private pubKeyAddress: string;
@@ -37,20 +44,62 @@ export class DataReciever {
   private hashStore: HashStore;
   private dataConnectors: Map<string, DataPublishConnector>;
 
-  constructor({ seed }: { seed: string }) {
-    this.iota = composeAPI({
-      provider: defaultNodeAddress,
-    });
+  constructor({
+    seed,
+    powApiKey = defaultPowApiKey,
+  }: {
+    seed: string;
+    powApiKey?: string;
+  }) {
+    if (powApiKey && powApiKey !== '') {
+      const timeout: number = 3000;
+      const apiServer: string = 'https://api.powsrv.io:443';
+
+      const attachFunction = CreateAttachToTangleWithPwrSvr(
+        powApiKey,
+        timeout,
+        apiServer
+      );
+      this.iota = composeAPI({
+        provider: defaultNodeAddress,
+        attachToTangle: attachFunction,
+      });
+    } else {
+      this.iota = composeAPI({
+        provider: defaultNodeAddress,
+      });
+    }
+
     this.seed = seed ? seed : generateSeed();
     this.dataConnectors = new Map();
     this.hashStore = new HashStore([]);
+    this.performanceMap = new Map();
   }
   /**
    * init
    */
   public async init() {
+    let hrTime = process.hrtime();
+    const startTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+
     this.keyPair = await createKeyPair(this.seed);
+    hrTime = process.hrtime();
+    const createKeyPairTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+
     this.pubKeyAddress = await this.publishPubKey();
+    hrTime = process.hrtime();
+    const publishPubKey = hrTime[0] * 1000000 + hrTime[1] / 1000;
+    const performance = {
+      overall: publishPubKey - startTime,
+      publishPubKey: publishPubKey - createKeyPairTime,
+      createKeyPair: createKeyPairTime - startTime,
+      pubKeyAddress: this.pubKeyAddress,
+      seed: this.seed,
+      node: defaultNodeAddress,
+      mwm: defaultMwm,
+      depth: defaultDepth,
+    };
+    this.performanceMap.set(performance.pubKeyAddress, performance);
   }
   /**
    * publishPubKey

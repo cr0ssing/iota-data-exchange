@@ -3,16 +3,13 @@
 import { createKeyPair, toTrytes } from '@decentralized-auth/ntru';
 import * as cors from 'cors';
 import * as express from 'express';
-import * as http from 'http';
-import * as mongoose from 'mongoose';
-import { runInNewContext } from 'vm';
-import * as WebSocket from 'ws';
 import { DataOwner, DataPublisher, DataReciever } from './lib';
+import { defaultPowApiKey, defaultPublishIntervall } from './lib/config';
 import DataPublishConnector from './lib/DataPublishConnector';
 import DateTag from './lib/DateTag';
-import { hashListFromDatatags } from './lib/hashingTree';
+import { hashFromDatetag, hashListFromDatatags } from './lib/hashingTree';
+import { generateSeed } from './lib/iotaUtils';
 const app = express();
-const router = express.Router();
 
 const publisherStore: Map<string, DataPublisher> = new Map();
 const ownerStore: Map<string, DataOwner> = new Map();
@@ -52,6 +49,7 @@ app.post('/publisher/add', async (req, res) => {
       dataType: req.body.dataType,
       fitbitAccessToken: req.body.fitbitAccessToken,
       fitbitUserId: req.body.fitbitUserId,
+      powApiKey: defaultPowApiKey,
     });
     const connector = new DataPublishConnector({
       masterSecret: req.body.masterSecret,
@@ -95,9 +93,11 @@ app.get('/getDataPublisherMessages', (req, res) => {
 app.post('/publisher/start/', async (req, res) => {
   try {
     const pub = publisherStore.get(req.body.id);
-    const inte = await pub.run(5000);
+    const inte = await pub.run(defaultPublishIntervall);
     return res.json(itemToJson(pub, req.body.id));
   } catch (error) {
+    console.log(error);
+
     return res.json(error);
   }
 });
@@ -255,6 +255,132 @@ app.post('/reciever/fetchMessages', async (req, res) => {
 });
 
 // ---------------------------------------------------------
+
+app.post('/performance/hashnodesFromDaterange', (req, res) => {
+  try {
+    const rounds = req.body.rounds;
+    const performance = [];
+    for (let index = 0; index < rounds; index++) {
+      const yearstart = 2019 + Math.floor(Math.random() * (2 - 0) + 0);
+      const yearend = yearstart + Math.floor(Math.random() * (2 - 0) + 0);
+      const monthstart = Math.floor(Math.random() * (12 - 1) + 1);
+      let monthend = Math.floor(Math.random() * (12 - 1) + 1);
+      if (yearstart === yearend) {
+        while (monthstart > monthend) {
+          monthend = Math.floor(Math.random() * (12 - 1) + 1);
+        }
+      }
+      const daystart = Math.floor(Math.random() * (31 - 1) + 1);
+      let dayend = Math.floor(Math.random() * (31 - 1) + 1);
+
+      if (yearstart === yearend && monthstart === monthend) {
+        while (daystart > dayend) {
+          dayend = Math.floor(Math.random() * (31 - 1) + 1);
+        }
+      }
+      const dateStart = new DateTag(yearstart, monthstart, daystart);
+      const dateEnd = new DateTag(yearend, monthend, dayend);
+      const mastersecret = 'SomeSecret';
+      let hrTime = process.hrtime();
+      const startTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+
+      const hashlist = hashListFromDatatags(mastersecret, dateStart, dateEnd);
+      hrTime = process.hrtime();
+      const endTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+      const duration = Math.floor(endTime - startTime);
+      const perf = {
+        startDate: dateStart.toString(),
+        endDate: dateEnd.toString(),
+        hashlistLenght: hashlist.length,
+        duration,
+      };
+      performance.push(perf);
+    }
+    return res.json(performance);
+  } catch (error) {
+    console.log(error);
+  }
+});
+app.post('/performance/hashFromDatetag', (req, res) => {
+  try {
+    const rounds = req.body.rounds;
+    const mastersecret = req.body.mastersecret;
+    const format = ['YMD', 'YMDH', 'YMDHM'];
+    const performance = [];
+    for (let index = 0; index < format.length; index++) {
+      const currentFormat = format[index];
+
+      for (let index = 0; index < rounds; index++) {
+        const year = Math.floor(Math.random() * (2050 - 2015) + 1);
+        const month = Math.floor(Math.random() * (12 - 1) + 1);
+        const day = Math.floor(Math.random() * (31 - 1) + 1);
+        let hour;
+        let minute;
+        let second;
+        if (currentFormat === 'YMDH') {
+          hour = Math.floor(Math.random() * (24 - 0) + 0);
+        }
+        if (currentFormat === 'YMDHM') {
+          hour = Math.floor(Math.random() * (24 - 0) + 0);
+          minute = Math.floor(Math.random() * (60 - 0) + 0);
+        }
+        if (currentFormat === 'YMDHMS') {
+          hour = Math.floor(Math.random() * (24 - 0) + 0);
+          minute = Math.floor(Math.random() * (60 - 0) + 0);
+          second = Math.floor(Math.random() * (60 - 0) + 0);
+        }
+        const date = new DateTag(year, month, day, hour, minute, second);
+        let hrTime = process.hrtime();
+        const startTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+
+        const hash = hashFromDatetag(mastersecret, date);
+        hrTime = process.hrtime();
+        const endTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+        const duration = Math.floor(endTime - startTime);
+        const perf = {
+          date: date.toString(),
+          hash,
+          mastersecret,
+          duration,
+          format: currentFormat,
+        };
+        performance.push(perf);
+      }
+    }
+    return res.json(performance);
+  } catch (error) {
+    console.log(error);
+  }
+});
+app.post('/performance/publishPubkey', async (req, res) => {
+  try {
+    const rounds = req.body.rounds;
+    const performance = [];
+    for (let index = 0; index < rounds; index++) {
+      const rec = new DataReciever({
+        seed: generateSeed(),
+      });
+      await rec.init();
+      const perfarray = Array.from(rec.performanceMap);
+      performance.push(...perfarray);
+      await timeout(4000);
+    }
+    return res.json(performance);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.post('/performance/sentMessage', async (req, res) => {
+  try {
+    const publisher = publisherStore.get(req.body.publisherId);
+    const txs = await publisher.sentMessage(req.body.payload);
+    res.json(txs);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 // ---------------------------------------------------------
 
 app.listen(process.env.PORT || 9999, () =>
@@ -276,6 +402,8 @@ function replacer(key, value) {
     return Array.from(value);
   } else if (key == 'dateMap') {
     return Array.from(value);
+  } else if (key == 'performanceMap') {
+    return Array.from(value);
   } else {
     return value;
   }
@@ -286,4 +414,18 @@ function itemToJson(item: any, id: string) {
     id,
     data: JSON.parse(JSON.stringify(item, replacer)),
   };
+}
+async function sentNumberOFMessages(
+  publisher: DataPublisher,
+  numberOfMessages: number
+) {
+  for (let index = 0; index < numberOfMessages; index++) {
+    const pause = timeout(defaultPublishIntervall);
+    await publisher.sentMessage(new Date().toISOString());
+    await pause;
+  }
+}
+
+function timeout(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
