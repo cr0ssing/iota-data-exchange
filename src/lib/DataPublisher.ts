@@ -90,6 +90,7 @@ export class DataPublisher {
       this.securitsLevel
     );
     if (this.powApiKey && this.powApiKey !== '') {
+      console.log('Enabled remote POW.');
       this.writer.EnablePowSrv(true, this.powApiKey);
     }
     // Object.assign(this.writer.changeMode, modifiedChangeMode);
@@ -315,9 +316,9 @@ export class DataPublisher {
 
     hrTime = process.hrtime();
     const endSidekeyCalculation = hrTime[0] * 1000000 + hrTime[1] / 1000;
-    console.log(
-      `key caluclation took: ${endSidekeyCalculation - startSidekeyCalculation}`
-    );
+    // console.log(
+    //   `key caluclation took: ${endSidekeyCalculation - startSidekeyCalculation}`
+    // );
     this.writer.changeMode(this.mamMode, sideKey, defaultMAMSecurity);
     hrTime = process.hrtime();
     const startCreateMessage = hrTime[0] * 1000000 + hrTime[1] / 1000;
