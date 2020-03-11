@@ -2,12 +2,13 @@ const fs = require('fs');
 const hash = require('object-hash');
 const util = require('util');
 
-// evalFile('hashFromDatetag-desktop.json');
-evalFile(
-  'publish-desktop.json',
-  ['sideKeyCalculation', 'createMessage', 'attachMessage'],
-  ['mwm']
-);
+evalFile('hashFromDatetag-pi.json');
+evalFile('hashFromDatetag-desktop.json');
+// evalFile(
+//   'publish-desktop.json',
+//   ['sideKeyCalculation', 'createMessage', 'attachMessage'],
+//   ['mwm']
+// );
 
 function evalFile(
   name,
