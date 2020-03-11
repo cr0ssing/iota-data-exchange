@@ -100,6 +100,7 @@ export class DataReciever {
       depth: defaultDepth,
     };
     this.performanceMap.set(performance.pubKeyAddress, performance);
+    console.log('Receiver initialized.');
   }
   /**
    * publishPubKey
@@ -107,12 +108,15 @@ export class DataReciever {
   public async publishPubKey(): Promise<string> {
     const pubKeyTryte = toTrytes(this.keyPair.public);
     const pubKeyAdd = tritsToTrytes(hashCurl(trytesToTrits(pubKeyTryte)));
+    console.log('Looking for existing published public keys.');
     const tanglePubKey: Transaction[] = await this.iota.findTransactionObjects({
       addresses: [pubKeyAdd],
     });
     if (tanglePubKey.length > 0) {
+      console.log('Found public key.');
       return tanglePubKey[0].bundle;
     } else {
+      console.log('Found no public key. Publishing...');
       const msg = await sentMsgToTangle(
         this.iota,
         this.seed,
@@ -120,6 +124,7 @@ export class DataReciever {
         pubKeyTryte,
         'PUBKEY'
       );
+      console.log('Published public key.');
       return msg[0].bundle;
     }
   }

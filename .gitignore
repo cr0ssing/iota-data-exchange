@@ -2,3 +2,6 @@ out/
 node_modules
 coverage/
 sonarlint\.json
+private-tangle/db/
+private-tangle/config/
+private-tangle/docs-static/

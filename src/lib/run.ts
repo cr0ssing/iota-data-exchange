@@ -1,8 +1,11 @@
 import {
-  defaultSeed,
+  defaultMwm,
+  defaultNodeAddress,
+  defaultPowApiKey,
   defaultSeedOwner,
   defaultSeedPublisher,
   defaultSeedReciever,
+  tagDateFormat,
 } from './config';
 import { DataOwner } from './DataOwner';
 import DataPublishConnector from './DataPublishConnector';
@@ -16,31 +19,36 @@ const masterSecret = 'IamSecret';
 const publisher = new DataPublisher();
 const owner = new DataOwner();
 const reciever = new DataReciever({ seed: defaultSeedReciever });
-const inits = [
-  publisher.init({
-    masterSecret,
-    seed: defaultSeedPublisher,
-    dataType: 'timestamp',
-  }),
-  owner.init({
-    masterSecret,
-    seed: defaultSeedOwner,
-  }),
-  reciever.init(),
-];
 
 async function init() {
-  await Promise.all(inits);
+  console.log('Using node:', defaultNodeAddress);
+  console.log('Using tag format:', tagDateFormat);
+  console.log('Using mwm:', defaultMwm);
+
+  await Promise.all([
+    publisher.init({
+      masterSecret,
+      seed: defaultSeedPublisher,
+      dataType: 'timestamp',
+      powApiKey: defaultPowApiKey,
+    }),
+    owner.init({
+      masterSecret,
+      seed: defaultSeedOwner,
+    }),
+    reciever.init(),
+  ]);
+
   console.log('init finished');
-  const pubInt = await publisher.run(5000);
+  const pubInt = await publisher.run(5000, 2);
   console.log('publisher triggered');
   const connector = new DataPublishConnector({
     masterSecret,
   });
   const hashlist = hashListFromDatatags(
     masterSecret,
-    new DateTag(2019, 8, 1),
-    new DateTag(2019, 12, 31)
+    new DateTag(2020, 1, 1),
+    new DateTag(2020, 4, 1)
   );
   await connector.connect(publisher.getNextRoot(), hashlist);
   console.log('connector connected');
@@ -54,10 +62,7 @@ async function init() {
       .getMsg()
       .then(msg => console.log(colors.red(`connector recieved msg: ${msg}`)));
   }, 10000);
-  return [pubInt, readerInt];
-}
 
-async function run() {
   await reciever.publishPubKey();
 
   await reciever.requestAccess({
@@ -66,7 +71,7 @@ async function run() {
     dataType: 1,
     peerAddress: owner.getSubscriptionRequestAddress(),
     peerPubKey: owner.getPubKey(),
-    publisherId: '',
+    publisherId: 'Device1',
   });
 
   console.log('reciever requested access');
@@ -84,8 +89,6 @@ async function run() {
   console.log(JSON.stringify(welcomeMsg));
   return;
 }
-init().then(() => {
-  run().catch(e => {
-    console.log(e);
-  });
+init().catch(e => {
+  console.log(e);
 });

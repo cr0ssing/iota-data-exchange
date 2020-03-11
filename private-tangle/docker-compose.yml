@@ -1,14 +1,12 @@
 version: '3'
 services:
   compass:
-    image: 'iotacafe/compass:coordinator-554440c'
-    restart: 'unless-stopped'
-    networks:
-      - web
+    image: 'iotacafe/compass:coordinator-8306ac7'
+    # network_mode: host
     depends_on:
       - 'iri'
     volumes:
-      - compas-state:/state
+      - ./state:/state
       - ./layers:/layers
     command: coordinator_deploy.jar
       ${EXTRA_COMPASS_FLAGS}
@@ -16,39 +14,31 @@ services:
       -layers /layers
       -sigMode CURLP27
       -powMode CURLP81
-      -mwm 5
-      -security 1
+      -mwm ${MWM}
+      -security ${SECURITY_LEVEL}
       -seed MYSEEDHEREPLEASEREPLACEMEIMMEDIATELYWITHSOMETHINGSECURE99999999999999999999999999
       -tick ${TICK_RATE}
-      -host http://iri:14265
+      -host http://iri:${IRI_PORT}
       -statePath /state/statefile
   iri:
+    # network_mode: host
     image: 'iotaledger/iri:latest'
-    restart: 'unless-stopped'
-
     ports:
-      - 14265:14265
-      - 5556:5556
-    networks:
-      - web
+      - '${IRI_PORT}:${IRI_PORT}'
+      - '5556:5556'
     volumes:
-      - ./snapshot.txt:/snapshot.txt
-      - iri-db:/iri/data
+      - ./config/snapshot.txt:/snapshot.txt
+      - ./db:/iri/data
     command: >-
       --testnet true
       --remote true
+      --zmq-enable-tcp true
+      --remote-limit-api ""
       --testnet-coordinator ZRMNUUBQHVRFRFBOQZYGAUBSTJSHDVIPXHUDA9VAXFTDSGGRILPVMYLVOLVCIEHLFMQKUOHUIUWILCXGD
       --testnet-coordinator-security-level ${SECURITY_LEVEL}
       --testnet-coordinator-signature-mode CURLP27
-      --mwm 1
+      --mwm ${MWM}
       --milestone-start 0
       --milestone-keys 20
       --snapshot /snapshot.txt
       --max-depth 1000
-      --zmq-enabled true
-      --remote-limit-api removeNeighbors,addNeighbors,getNeighbors,setApiRateLimit
-volumes:
-  iri-db:
-  compas-state:
-networks:
-  web:

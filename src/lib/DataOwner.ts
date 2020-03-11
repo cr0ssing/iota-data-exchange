@@ -21,6 +21,7 @@ export class DataOwner {
       subscriptionRequestAddress,
     });
     const subManinit = await this.subMan.init();
+    console.log('Owner initialized.');
   }
   /**
    * getMessage

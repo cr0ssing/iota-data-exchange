@@ -39,7 +39,7 @@ export class DataPublisher {
   private fitbitRefreshToken?: string;
   private performanceMap: Map<string, any>;
   private powApiKey: string;
-  constructor() {}
+  constructor() { }
   /**
    * init
    */
@@ -94,8 +94,11 @@ export class DataPublisher {
     }
     // Object.assign(this.writer.changeMode, modifiedChangeMode);
     this.currentRoot = this.writer.getNextRoot();
-    await this.writer.catchUpThroughNetwork();
+    console.log('Syncing MAM stream for publishing.')
+    const msgs = await this.writer.catchUpThroughNetwork();
+    console.log(`Fetched ${msgs.length} existing messages.`)
     this.initialized = true;
+    console.log('Publisher initialized.');
   }
   /**
    * isRunning
@@ -114,7 +117,7 @@ export class DataPublisher {
   /**
    * run
    */
-  public async run(interval: number) {
+  public async run(interval: number, messageCount = 1000) {
     if (this.runInterval) {
       clearInterval(this.runInterval);
     }
@@ -145,6 +148,7 @@ export class DataPublisher {
         this.fitbitRefreshToken = authResponse.data.refresh_token;
         this.fitbitUserId = authResponse.data.user_id;
       }
+      let sentMessages = 0;
       this.runInterval = setInterval(async () => {
         let txs = [];
         if (this.dataType === 'fitbit') {
@@ -166,11 +170,11 @@ export class DataPublisher {
                 : '0' + date.getMinutes().toString();
             const url = `https://api.fitbit.com/1/user/${
               this.fitbitUserId
-            }/activities/heart/date/${year}-${
+              }/activities/heart/date/${year}-${
               month >= 10 ? month : '0' + month
-            }-${
+              }-${
               day >= 10 ? day : '0' + day
-            }/1d/1sec/time/${startHour}:${startMin}/${endHour}:${endmin}.json`;
+              }/1d/1sec/time/${startHour}:${startMin}/${endHour}:${endmin}.json`;
             console.log(url);
             let resp;
             try {
@@ -238,9 +242,14 @@ export class DataPublisher {
           endTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
         }
         this.messages.push(txs[0].address);
+        sentMessages++;
+        if (sentMessages >= messageCount) {
+          clearInterval(this.runInterval);
+          console.log(JSON.stringify(Array.from(this.performanceMap.values())));
+        }
         console.log(
           `Message published at ${txs[0].address} from ${
-            this.seed
+          this.seed
           } which took ${endTime - startTime}`
         );
       }, interval);

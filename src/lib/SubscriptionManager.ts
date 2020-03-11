@@ -67,6 +67,7 @@ export default class SubscriptionManager {
     this.iota = composeAPI({
       provider: defaultNodeAddress,
     });
+    console.log('Subscription manager initialized.')
   }
 
   /**
@@ -170,6 +171,7 @@ export default class SubscriptionManager {
     requestBundleHash: string,
     dataConnectors: Map<string, DataPublishConnector>
   ) {
+
     const reqBundle = this.accessRequests.get(requestBundleHash);
 
     const {
@@ -185,7 +187,8 @@ export default class SubscriptionManager {
     if (!connector) {
       throw Error(`No Data Connector with id ${publisherId}`);
     }
-    await connector.fetchAllMessages();
+    const msgs = await connector.fetchAllMessages();
+    console.log(`Fetched ${msgs.length} messages.`);
     const tagString = startDate.toString().substring(0, 8);
     const nextRoot = connector.dateMap.get(tagString);
     if (!nextRoot) {

@@ -330,11 +330,12 @@ app.post('/performance/hashFromDatetag', (req, res) => {
           second = Math.floor(Math.random() * (60 - 0) + 0);
         }
         const date = new DateTag(year, month, day, hour, minute, second);
+
         let hrTime = process.hrtime();
         const startTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
-
         const hash = hashFromDatetag(mastersecret, date);
         hrTime = process.hrtime();
+
         const endTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
         const duration = Math.floor(endTime - startTime);
         const perf = {
@@ -384,7 +385,7 @@ app.post('/performance/sentMessage', async (req, res) => {
 // ---------------------------------------------------------
 
 app.listen(process.env.PORT || 9999, () =>
-  console.log(`Example app listening on port ${process.env.PORT}!`)
+  console.log(`Example app listening on port ${process.env.PORT || 9999}!`)
 );
 // start our server
 // server.listen(process.env.PORT || 8999, () => {
