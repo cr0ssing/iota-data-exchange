@@ -24,6 +24,7 @@
     "@types/ws": "^6.0.2",
     "eslint": "^6.1.0",
     "jest": "^24.8.0",
+    "object-hash": "^2.0.3",
     "prettier": "^1.18.2",
     "rewire": "^4.0.1",
     "ts-jest": "^24.0.2",
