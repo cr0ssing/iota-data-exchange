@@ -92,6 +92,9 @@ export class DataPublisher {
     if (this.powApiKey && this.powApiKey !== '') {
       console.log('Enabled remote POW.');
       this.writer.EnablePowSrv(true, this.powApiKey);
+    } else {
+      console.log('Doing pow locally.');
+      this.writer.EnableLocalPow();
     }
     // Object.assign(this.writer.changeMode, modifiedChangeMode);
     this.currentRoot = this.writer.getNextRoot();

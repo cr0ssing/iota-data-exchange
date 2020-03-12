@@ -18,6 +18,7 @@ import { keyGen } from './KeyGen';
 import { Mam, MamDetails } from './node';
 import { CreateAttachToTangleWithPwrSvr } from './PwrSrv';
 import { MAM_MODE, MAM_SECURITY } from './Settings';
+import { localPOW } from 'curl.lib.js';
 
 interface channel {
   side_key: string | null;
@@ -253,6 +254,10 @@ export class MamWriter {
       // Resets to default Attach function
       this.attachFunction = createAttachToTangle(this.provider);
     }
+  }
+
+  public EnableLocalPow() {
+    this.attachFunction = localPOW;
   }
 
   /**
