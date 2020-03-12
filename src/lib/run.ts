@@ -13,9 +13,10 @@ import { DataPublisher } from './DataPublisher';
 import { DataReciever } from './DataReciever';
 import DateTag from './DateTag';
 import { hashListFromDatatags } from './hashingTree';
+import { generateSeed } from './iotaUtils';
 
 const colors = require('colors');
-const masterSecret = 'IamSecret';
+const masterSecret = 'IamSecret2';
 const publisher = new DataPublisher();
 const owner = new DataOwner();
 const reciever = new DataReciever({ seed: defaultSeedReciever });
@@ -28,13 +29,13 @@ async function init() {
   await Promise.all([
     publisher.init({
       masterSecret,
-      seed: defaultSeedPublisher,
+      seed: 'RTZUHJGFDIKSHDJHGFVDMJUZTFFDGHJGFDFTGGFHSDHTZGFKSGDBVJKJDVBGFDZVGHDFSDUIGHGHJFGFG',
       dataType: 'timestamp',
       powApiKey: defaultPowApiKey,
     }),
     owner.init({
       masterSecret,
-      seed: defaultSeedOwner,
+      seed: 'RTZHJNHBVDRDTGFDJKFGFKGRBVHTGDVHREZRVGDJRDVGZEZSDUFZGKDSGVHZKHNVFGDHFGVBJGDJKDGDG',
     }),
     reciever.init(),
   ]);
@@ -47,7 +48,7 @@ async function init() {
   });
   const hashlist = hashListFromDatatags(
     masterSecret,
-    new DateTag(2020, 1, 1),
+    new DateTag(2020, 3, 12),
     new DateTag(2020, 4, 1)
   );
   await connector.connect(publisher.getNextRoot(), hashlist);
@@ -57,17 +58,14 @@ async function init() {
     conn: connector,
     id: 'Device1',
   });
-  const readerInt = setInterval(() => {
-    connector
-      .getMsg()
-      .then(msg => console.log(colors.red(`connector recieved msg: ${msg}`)));
-  }, 10000);
+  const readerInt = setInterval(() => connector.getMsg()
+    .then(msg => console.log(colors.red(`connector recieved msg: ${msg}`))), 10000);
 
   await reciever.publishPubKey();
 
   await reciever.requestAccess({
-    start: new DateTag(2019, 8, 21),
-    end: new DateTag(2019, 12, 10),
+    start: new DateTag(2020, 3, 12),
+    end: new DateTag(2020, 4, 1),
     dataType: 1,
     peerAddress: owner.getSubscriptionRequestAddress(),
     peerPubKey: owner.getPubKey(),
@@ -81,7 +79,7 @@ async function init() {
   const sub = await owner.acceptAccessRequest(msg[0].bundle);
 
   console.log(
-    `accepted Request from ${sub.startDate.toString()} to ${sub.endDate.toString()} `
+    `accepted Request from ${sub.startDate.toString()} to ${sub.endDate.toString()}`
   );
   const welcomeMsg = await reciever.checkOpenRequests();
 
@@ -89,6 +87,5 @@ async function init() {
   console.log(JSON.stringify(welcomeMsg));
   return;
 }
-init().catch(e => {
-  console.log(e);
-});
+
+init().catch(e => console.log(e));
