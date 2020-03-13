@@ -215,6 +215,7 @@ export class MamWriter {
       const prepareTransfers: any = createPrepareTransfers();
       prepareTransfers(this.seed, transfers, {})
         .then(transactionTrytes => {
+          console.log('Attach message to tangle...');
           sendTrytes(transactionTrytes, depth, mwm)
             .then(transactions => {
               resolve(transactions as Transaction[]);

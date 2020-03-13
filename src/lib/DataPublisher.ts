@@ -17,6 +17,7 @@ import DateTag from './DateTag';
 import { hashFromDatetag } from './hashingTree';
 import { generateSeed } from './iotaUtils';
 import { getNodesBetween } from './treeCalculation';
+import { setIntervalAsync } from 'set-interval-async/dynamic';
 
 export class DataPublisher {
   private initialized: boolean;
@@ -153,7 +154,7 @@ export class DataPublisher {
         this.fitbitUserId = authResponse.data.user_id;
       }
       let sentMessages = 0;
-      this.runInterval = setInterval(async () => {
+      this.runInterval = setIntervalAsync(async () => {
         let txs = [];
         if (this.dataType === 'fitbit') {
           try {

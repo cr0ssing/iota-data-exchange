@@ -52,6 +52,7 @@
     "ntrujs": "^1.0.18",
     "one-time-pad": "^1.0.3",
     "query-string": "^6.8.3",
+    "set-interval-async": "^1.0.30",
     "text-encoding": "^0.7.0",
     "util": "^0.12.1",
     "utils": "^0.3.1",

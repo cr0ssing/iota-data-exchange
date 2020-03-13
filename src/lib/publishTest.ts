@@ -17,7 +17,7 @@ async function init() {
   await Promise.all([
     publisher.init({
       masterSecret,
-      seed: defaultSeedPublisher,
+      seed: 'RTZHJFDSTRZUHGFDGHGFDFHGHDHFGHHFGHG',
       dataType: 'timestamp',
       powApiKey: defaultPowApiKey,
     }),

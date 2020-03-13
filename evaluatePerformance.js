@@ -2,13 +2,13 @@ const fs = require('fs');
 const hash = require('object-hash');
 const util = require('util');
 
-evalFile('hashFromDatetag-pi.json');
-evalFile('hashFromDatetag-desktop.json');
-// evalFile(
-//   'publish-desktop.json',
-//   ['sideKeyCalculation', 'createMessage', 'attachMessage'],
-//   ['mwm']
-// );
+// evalFile('hashFromDatetag-pi.json');
+// evalFile('hashFromDatetag-desktop.json');
+evalFile(
+  'test-14-L.json',
+  ['sideKeyCalculation', 'createMessage', 'attachMessage'],
+  ['mwm']
+);
 
 function evalFile(
   name,
@@ -66,7 +66,9 @@ function evalFile(
 
           groupPortions[prop] = durationFields
             .map(durationName => ({
-              [durationName]: value[durationName][prop] / sum,
+              [durationName]:
+                parseFloat((value[durationName][prop] * 100) / sum).toFixed(2) +
+                '%',
             }))
             .reduce((acc, v) => ({ ...acc, ...v }));
         });
