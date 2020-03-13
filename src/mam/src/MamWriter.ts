@@ -48,7 +48,7 @@ export class MamWriter {
   // private provider : Partial<Settings>;
   private provider: Provider;
   private channel: channel;
-  private seed: string;
+  public seed: string;
   private tag: string;
   private attachFunction: AttachToTangle | undefined;
 

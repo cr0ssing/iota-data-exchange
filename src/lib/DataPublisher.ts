@@ -28,7 +28,7 @@ export class DataPublisher {
   private mamMode = MAM_MODE.RESTRICTED;
   private sideKey: string | undefined;
   private securitsLevel: MAM_SECURITY;
-  private writer: MamWriter;
+  public writer: MamWriter;
   private currentRoot: string;
   private runInterval;
   private messages: string[] = [];
