@@ -17,7 +17,8 @@ import DateTag from './DateTag';
 import { hashFromDatetag } from './hashingTree';
 import { generateSeed } from './iotaUtils';
 import { getNodesBetween } from './treeCalculation';
-import { setIntervalAsync, clearInterval } from 'set-interval-async/dynamic';
+import { setIntervalAsync } from 'set-interval-async/dynamic';
+import { clearIntervalAsync } from 'set-interval-async';
 
 export class DataPublisher {
   private initialized: boolean;
@@ -249,10 +250,10 @@ export class DataPublisher {
         this.messages.push(txs[0].address);
         sentMessages++;
         if (sentMessages >= messageCount) {
-          clearInterval(this.runInterval);
+          clearIntervalAsync(this.runInterval);
         }
         console.log(
-          `Message published at ${txs[0].address} from ${
+          `Message ${sentMessages} published at ${txs[0].address} from ${
           this.seed
           } which took ${endTime - startTime}`
         );
