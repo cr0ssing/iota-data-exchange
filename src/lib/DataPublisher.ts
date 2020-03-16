@@ -249,15 +249,15 @@ export class DataPublisher {
         }
         this.messages.push(txs[0].address);
         sentMessages++;
-        if (sentMessages >= messageCount) {
-          clearIntervalAsync(this.runInterval);
-        }
         console.log(
           `Message ${sentMessages} published at ${txs[0].address} from ${
           this.seed
           } which took ${endTime - startTime}`
         );
-        console.log(JSON.stringify(Array.from(this.performanceMap.values())));
+        if (sentMessages >= messageCount) {
+          clearIntervalAsync(this.runInterval);
+          console.log(JSON.stringify(Array.from(this.performanceMap.values())));
+        }
       }, interval);
       this.state = true;
       return this.runInterval;
