@@ -17,7 +17,7 @@ import DateTag from './DateTag';
 import { hashFromDatetag } from './hashingTree';
 import { generateSeed } from './iotaUtils';
 import { getNodesBetween } from './treeCalculation';
-import { setIntervalAsync } from 'set-interval-async/dynamic';
+import { setIntervalAsync, clearInterval } from 'set-interval-async/dynamic';
 
 export class DataPublisher {
   private initialized: boolean;
