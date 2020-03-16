@@ -7,18 +7,21 @@ import {
 } from '@iota/core';
 import {
   AttachToTangle,
+  Callback,
+  Hash,
   Provider,
   Transaction,
   Transfer,
+  Trytes,
 } from '@iota/core/typings/types';
 import { createHttpClient } from '@iota/http-client';
 import { isTrytes, isTrytesOfExactLength } from '@iota/validators';
+import * as curl from 'curl.lib.js';
 import { hash } from './hash';
 import { keyGen } from './KeyGen';
 import { Mam, MamDetails } from './node';
 import { CreateAttachToTangleWithPwrSvr } from './PwrSrv';
 import { MAM_MODE, MAM_SECURITY } from './Settings';
-import { localPOW } from 'curl.lib.js';
 
 interface channel {
   side_key: string | null;
@@ -224,6 +227,7 @@ export class MamWriter {
               reject(
                 `sendTrytes failed: ${error}; Try to switch nodes, this one might not support PoW`
               );
+              console.error(error);
             });
         })
         .catch(error => {
@@ -258,7 +262,21 @@ export class MamWriter {
   }
 
   public EnableLocalPow() {
-    this.attachFunction = localPOW;
+    // this.attachFunction = curl.localPoW;
+    // this.attachFunction = async (
+    //   trunkTransaction: Hash,
+    //   branchTransaction: Hash,
+    //   minWeightMagnitude: number,
+    //   trytes: ReadonlyArray<Trytes>,
+    //   callback?: Callback<ReadonlyArray<Trytes>>) => {
+    //   let hrTime = process.hrtime();
+    //   const result = await localPoW(trunkTransaction, branchTransaction, minWeightMagnitude, trytes, callback);
+    //   hrTime = process.hrtime();
+    //   const startTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+    //   const endTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+    //   console.log(`POW took ${endTime - startTime}`);
+    //   return result;
+    // };
   }
 
   /**

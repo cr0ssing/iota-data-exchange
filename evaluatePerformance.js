@@ -5,7 +5,7 @@ const util = require('util');
 // evalFile('hashFromDatetag-pi.json');
 // evalFile('hashFromDatetag-desktop.json');
 evalFile(
-  'test-14-L.json',
+  process.argv[2],
   ['sideKeyCalculation', 'createMessage', 'attachMessage'],
   ['mwm']
 );
@@ -13,7 +13,8 @@ evalFile(
 function evalFile(
   name,
   durationFields = ['duration'],
-  groupingFields = ['format']
+  groupingFields = ['format'],
+  processor = value => value / 1000
 ) {
   try {
     const file = fs.readFileSync(name, 'utf8');
@@ -37,7 +38,7 @@ function evalFile(
     }
     const absolute = new Map();
     Array.from(map.entries()).forEach(([key, value]) => {
-      const getPoints = name => value.map(p => p[name]);
+      const getPoints = name => value.map(p => p[name]).map(processor);
       const stats = durationFields
         .map(k => ({
           [k]: {
@@ -67,8 +68,7 @@ function evalFile(
           groupPortions[prop] = durationFields
             .map(durationName => ({
               [durationName]:
-                parseFloat((value[durationName][prop] * 100) / sum).toFixed(2) +
-                '%',
+                parseFloat(value[durationName][prop] / sum),
             }))
             .reduce((acc, v) => ({ ...acc, ...v }));
         });
