@@ -4,11 +4,18 @@ const util = require('util');
 
 // evalFile('hashFromDatetag-pi.json');
 // evalFile('hashFromDatetag-desktop.json');
+// evalFile(
+//   process.argv[2],
+//   ['sideKeyCalculation', 'createMessage', 'attachMessage'],
+//   ['mwm']
+// );
 evalFile(
   process.argv[2],
-  ['sideKeyCalculation', 'createMessage', 'attachMessage'],
+  ['sideKeyCalculation', 'decodeTagAndDecrypt', 'getKeyFromDatetag', 'getNextRoot', 
+    'changeMode', 'fetchSingle'],
   ['mwm']
 );
+
 
 function evalFile(
   name,

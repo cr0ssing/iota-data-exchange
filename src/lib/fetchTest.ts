@@ -1,4 +1,5 @@
 import {
+  defaultDepth,
   defaultMwm,
   defaultNodeAddress,
   defaultPowApiKey,
@@ -7,57 +8,66 @@ import {
   tagDateFormat,
 } from './config';
 import { DataPublisher } from './DataPublisher';
-import MamReaderExtended from './MamReaderExtendet';
-import { MAM_MODE } from 'mam.ts';
 import { DataReciever } from './DataReciever';
-import { hashListFromDatatags } from './hashingTree';
 import DateTag from './DateTag';
-
-const masterSecret = 'IamSecret';
-const publisher = new DataPublisher();
-const reciever = new DataReciever({ seed: defaultSeedReciever });
+import { hashFromDatetag, hashListFromDatatags } from './hashingTree';
+import MamReaderExtended from './MamReaderExtendet';
+import { MAM_MODE, MAM_SECURITY, MamWriter } from '../mam/src';
 
 async function init() {
   console.log('Using node:', defaultNodeAddress);
   console.log('Using tag format:', tagDateFormat);
   console.log('Using mwm:', defaultMwm);
 
-  await Promise.all([
-    publisher.init({
-      masterSecret,
-      seed: 'RTZHJFDSTRZUHGFDGHGFDFHGHDHFGHHFGHG',
-      dataType: 'timestamp',
-      powApiKey: defaultPowApiKey,
-    }),
-  ]);
-
-  const hashlist = hashListFromDatatags(
-    masterSecret,
-    new DateTag(2020, 3, 13),
-    new DateTag(2020, 4, 1)
+  const masterSecret = 'VerySecret';
+  const seed = 'RTZHJFDSTRZUHGFDGHGFDFHGHDHFGHHFGHG';
+  const writer = new MamWriter(
+    defaultNodeAddress,
+    seed,
+    MAM_MODE.RESTRICTED,
+    'unsecure',
+    MAM_SECURITY.LEVEL_1
   );
-
-  console.log('init finished');
-  const root = publisher.writer.getNextRoot();
-  let hrTime = process.hrtime();
-  const startTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
-  const txs = await publisher.sentMessage(new Date().toDateString());
-  hrTime = process.hrtime();
-  const endTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
-  console.log('message published');
+  const dateTag = new DateTag(2020, 3, 17);
+  const tag = dateTag.toTrytes();
+  writer.setTag(tag);
+  const sideKey = hashFromDatetag(masterSecret, dateTag);
+  const firstroot = writer.getNextRoot();
+  writer.changeMode(MAM_MODE.RESTRICTED, sideKey);
+  const changedroot = writer.getNextRoot();
+  await writer.catchUpThroughNetwork();
+  const root = writer.getNextRoot();
+  const mamMsg: {
+    payload: string;
+    root: string;
+    address: string;
+  } = writer.create('HelloWorld');
+  const attachedMsg = await writer.attach(
+    mamMsg.payload,
+    mamMsg.address,
+    defaultDepth,
+    defaultMwm
+  );
 
   await delay(5000);
   const performance = [];
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 100; i++) {
+    let hrTime = process.hrtime();
+    const startTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+    const hash = hashFromDatetag(masterSecret, dateTag);
+    hrTime = process.hrtime();
+    const endTime = hrTime[0] * 1000000 + hrTime[1] / 1000;
+    const sideKeyCalculation = Math.floor(endTime - startTime);
+
     const reader = new MamReaderExtended({
+      hashList: [{ prefix: dateTag.toBinStr(), hash }],
+      mode: MAM_MODE.RESTRICTED,
       provider: defaultNodeAddress,
       root,
-      mode: MAM_MODE.RESTRICTED,
       sideKey: 'unsecure',
-      hashList: hashlist
     });
     const resp = await reader.getMessage();
-    performance.push(resp.performance);
+    performance.push({ sideKeyCalculation, ...resp.performance });
   }
   console.log(JSON.stringify(performance));
 }
